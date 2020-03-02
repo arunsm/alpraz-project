@@ -6,7 +6,7 @@ addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/beeswarm-master'));
 addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/LausanneSurfaceFigures'));
 addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/LausanneCoordinates'))
 
-resultsDir = 'Results/minimalControl/avge_FD_thresh_0.5_parcelCoverageThresh_0.5_EuclideanNorm_allNodes_nullModel2/';
+resultsDir = 'Results/minimalControl/avge_FD_thresh_0.5_parcelCoverageThresh_0.5_EuclideanNorm_allNodes_QA/';
 
 allControlEnergies_emotionid = readtable(strcat(resultsDir, 'allControlEnergies_emotionid.csv'));
 allControlEnergies_emotionrec = readtable(strcat(resultsDir, 'allControlEnergies_emotionrec.csv'));
@@ -99,7 +99,7 @@ fprintf('range: %.1f-%.1f\n', min(subjectDemographics.SISTOTAL(group==1)), max(s
 
 %% Figure 1
 
-%% plot structural matrix
+% plot structural matrix
 
 figure; set(gcf, 'color', 'w');
 imagesc(A);
@@ -109,7 +109,15 @@ axis off;
 ax = gca;
 ax.FontSize = 12;
 
-%% plot brain activation maps w/ and w/o alpraz for individual subject
+% Figure depicting Lausanne parcellation
+
+parcelValues = zeros(234, 1);
+[~, ax, ph, ~] = fcn_lausannesurf(parcelValues, white, [-20 100]);
+view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
+view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(1), 'off'); axis(ax(2), 'off');
+
+% plot brain activation maps w/ and w/o alpraz for individual subject
 
 M = importdata('/Users/ArunMahadevan/Documents/BBL/studies/alpraz/derivatives/xcp_output_allTasks2/sub-010707/ses-001989/task-emotionid/norm/sub-010707_ses-001989_task-emotionid_contrast1_threatcorrectStd_lausanne_ROIv_scale125_dilated.txt');
 brainStates_alpraz = M.data';
@@ -118,7 +126,7 @@ view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight');
 view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');
 
-%% plot average brain mask coverage
+%% Supplementary Figure 1 - plot average brain mask coverage
 M = importdata('/Users/ArunMahadevan/Documents/BBL/studies/alpraz/slabCoverage_combinedMaskStd_emotionid.txt');
 slabCoverage = M.data';
 slabCoverage = double(slabCoverage > parcelCoverageThresh);
@@ -128,57 +136,6 @@ view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); 
 axis(ax(1), 'off'); axis(ax(2), 'off');
 
 %% Figure 2
-
-allNodes = ones(size(finalLabels, 1), 1); allNodes(finalLabels==8) = 0;
-DMN = double((finalLabels == 7));
-subCortical = double((finalLabels == 8));
-DMN_indices = find(finalLabels == 7);
-
-% plot brain maps highlighting all parcels
-[f, ax, ph, ~] = fcn_lausannesurf(allNodes, [0 0 0; 0.6350 0.0780 0.1840]);
-axis(ax(1), 'off'); axis(ax(2), 'off');
-view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull'); saveas(f(1), 'brainMap_allNodes_1.tif');
-view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull'); saveas(f(2), 'brainMap_allNodes_2.tif');
-[f, ax, ph, ~] = fcn_lausannesurf(allNodes, [0 0 0; 0.6350 0.0780 0.1840]);
-axis(ax(1), 'off'); axis(ax(2), 'off');
-view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull'); saveas(f(1), 'brainMap_allNodes_3.tif');
-view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull'); saveas(f(2), 'brainMap_allNodes_4.tif');
-
-figure;
-[f_ant,f_lat] = plot_subcortvol(ones(size(subCortical)), subcorticalIndices, subcorticalIndices, nifti, [0 0 0; 0.6350, 0.0780, 0.1840], 0, 1);
-saveas(f_ant, 'brainMap_allNodes_5.tif'); saveas(f_lat, 'brainMap_allNodes_6.tif');
-close all;
-
-% plot cortical and sub-cortical brain maps showing DMN
-[f, ax, ph, ~] = fcn_lausannesurf(DMN, [0 0 0; 0.9290, 0.6940, 0.1250]);
-axis(ax(1), 'off'); axis(ax(2), 'off');
-view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull'); saveas(f(1), 'brainMap_DMN_1.tif');
-view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull'); saveas(f(2), 'brainMap_DMN_2.tif');
-[f, ax, ph, ~] = fcn_lausannesurf(DMN, [0 0 0; 0.9290, 0.6940, 0.1250]);
-axis(ax(1), 'off'); axis(ax(2), 'off');
-view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull'); saveas(f(1), 'brainMap_DMN_3.tif');
-view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull'); saveas(f(2), 'brainMap_DMN_4.tif');
-
-figure;
-[f_ant,f_lat] = plot_subcortvol(ones(size(subCortical)), subcorticalIndices, subcorticalIndices, nifti, [0 0 0; 0.25, 0.25, 0.25], 0, 1);
-saveas(f_ant, 'brainMap_DMN_5.tif'); saveas(f_lat, 'brainMap_DMN_6.tif');
-close all;
-
-% plot cortical and sub-cortical brain maps showing sub-cortical areas
-[f, ax, ph, ~] = fcn_lausannesurf(subCortical, parula);
-axis(ax(1), 'off'); axis(ax(2), 'off');
-view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull'); saveas(f(1), 'brainMap_subcortex_1.tif');
-view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull'); saveas(f(2), 'brainMap_subcortex_2.tif');
-
-[f, ax, ph, ~] = fcn_lausannesurf(subCortical, parula);
-axis(ax(1), 'off'); axis(ax(2), 'off');
-view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull'); saveas(f(1), 'brainMap_subcortex_3.tif');
-view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull'); saveas(f(2), 'brainMap_subcortex_4.tif');
-
-figure;
-[f_ant,f_lat] = plot_subcortvol(ones(size(subCortical)), subcorticalIndices, subcorticalIndices, nifti, [0 0 0; 0.3010, 0.7450, 0.9330], 0, 1);
-saveas(f_ant, 'brainMap_subcortex_5.tif'); saveas(f_lat, 'brainMap_subcortex_6.tif');
-close all;
 
 %% creating mixed models to examine effects of clinical and demographic variables on persistence during emotionid
 
@@ -222,38 +179,59 @@ for i = 1:nContrasts
     save(strcat(resultsDir, 'mixedModel_emotionrec_', currentContrast, '.mat'), 'mixedModel_emotionrec_currentContrast');
 end
 
-%% plotting SISTOTAL and STAI_TRAIT against persistence_allNodes for nonthreat emotionid
+%% plot persistence during emotion id +/- Alpraz for controls and relatives; note that drug(0,1)=(alpraz,placebo)
 
+drug = allControlEnergies_emotionid.drug;
+group = allControlEnergies_emotionid.group;
 contrast = allControlEnergies_emotionid.contrast;
-allControlEnergies_emotionid_nonthreat = allControlEnergies_emotionid(strcmp(contrast, 'contrast3_nonthreatcorrectStd'), :);
-persistence_allNodes_nonthreat = allControlEnergies_emotionid_nonthreat.persistence_allNodes;
-allControlEnergies_emotionid_neutral = allControlEnergies_emotionid(strcmp(contrast, 'contrast5_neutralcorrectStd'), :);
-persistence_allNodes_neutral = allControlEnergies_emotionid_neutral.persistence_allNodes;
-SISTOTAL = allControlEnergies_emotionid_nonthreat.SISTOTAL;
-STAI_TRAIT = allControlEnergies_emotionid_nonthreat.STAI_TRAIT;
 
-figure; set(gcf, 'color', 'white');
-plot(SISTOTAL, persistence_allNodes_nonthreat, 'k.', 'MarkerSize', 20);
-h = lsline; h.LineWidth = 2;
-xlabel('SISTOTAL');
-ylabel('persistence energy - nonthreat');
+f = figure; set(gcf, 'color', 'w');
+f.PaperUnits = 'inches';
+f.PaperPosition = [0 0 6 5];
+
+x = [allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast1_threatcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast1_threatcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast1_threatcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast1_threatcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd')); ...
+    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd'))];
+
+groups = [ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast1_threatcorrectStd')))); ...
+    2*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast1_threatcorrectStd')))); ...
+    3*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast1_threatcorrectStd')))); ...
+    4*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast1_threatcorrectStd')))); ...
+    5*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')))); ...
+    6*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')))); ...
+    7*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')))); ...
+    8*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')))); ...
+    9*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
+    10*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
+    11*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
+    12*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd'))))];
+    
+positions = [1, 1.2, 1.4, 1.6, 2, 2.2, 2.4, 2.6, 3, 3.2, 3.4, 3.6];
+
+boxplot(x, groups, 'positions', positions, 'OutlierSize', 8, 'Symbol', 'k.');
+set(gca, 'XTickLabel', {'P', 'A', 'P', 'A', 'P', 'A', 'P', 'A', 'P', 'A', 'P', 'A'});
+
+%set(gca,'xtick',[])
+color = repmat({[0.4660, 0.6740, 0.1880], [0.4660, 0.6740, 0.1880], [0.4940, 0.1840, 0.5560], [0.4940, 0.1840, 0.5560]}, 1, 3); % right to left
+faceAlpha = repmat([0.75, 0.25], 1, 6); % right to left
+h = findobj(gca,'Tag','Box');
+for j=1:length(h)
+   currentFaceAlpha = faceAlpha(j); 
+   patch(get(h(j), 'XData'), get(h(j), 'YData'), color{j}, 'FaceAlpha', currentFaceAlpha);
+end
+
+ylabel('persistence energy')
+ylim([0.2, 0.65]);
 set(gca, 'FontSize', 20);
-[rho, pValue] = corr(SISTOTAL, persistence_allNodes_nonthreat, 'Rows', 'Complete')
-ylim([0.2, 0.65]);
-
-drug = allControlEnergies_emotionid_nonthreat.drug;
-
-figure; set(gcf, 'color', 'w'); set(gca, 'FontSize', 20); hold on;
-plot(STAI_TRAIT(drug==1), persistence_allNodes_neutral(drug==1), 'r.', 'MarkerSize', 20);
-plot(STAI_TRAIT(drug==0), persistence_allNodes_neutral(drug==0), 'b.', 'MarkerSize', 20);
-lsline;
-h = lsline; h(1).LineWidth = 2; h(2).LineWidth = 2; 
-xlabel('trait anxiety');
-ylabel('persistence energy - neutral');
-legend('placebo', 'alpraz', 'location', 'northeast'); legend boxoff;
-[rho, pValue] = corr(STAI_TRAIT(drug==0), persistence_allNodes_neutral(drug==0), 'Rows', 'Complete')
-[rho, pValue] = corr(STAI_TRAIT(drug==1), persistence_allNodes_neutral(drug==1), 'Rows', 'Complete')
-ylim([0.2, 0.65]);
 
 %% plot persistence during emotion rec +/- Alpraz for controls and relatives; note that drug(0,1)=(alpraz,placebo)
 
@@ -309,59 +287,142 @@ ylabel('persistence energy')
 ylim([0.2, 0.65]);
 set(gca, 'FontSize', 20);
 
-%% plot persistence during emotion id +/- Alpraz for controls and relatives; note that drug(0,1)=(alpraz,placebo)
+%% calculating average control impact across all subjects
 
-drug = allControlEnergies_emotionid.drug;
-group = allControlEnergies_emotionid.group;
-contrast = allControlEnergies_emotionid.contrast;
+%% emotionid
+avgeControlImpact_emotionid_allSubjects = zeros(nNodes, nContrasts);
 
-f = figure; set(gcf, 'color', 'w');
-f.PaperUnits = 'inches';
-f.PaperPosition = [0 0 6 5];
-
-x = [allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast1_threatcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast1_threatcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast1_threatcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast1_threatcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd')); ...
-    allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd'))];
-
-groups = [ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast1_threatcorrectStd')))); ...
-    2*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast1_threatcorrectStd')))); ...
-    3*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast1_threatcorrectStd')))); ...
-    4*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast1_threatcorrectStd')))); ...
-    5*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')))); ...
-    6*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')))); ...
-    7*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')))); ...
-    8*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast3_nonthreatcorrectStd')))); ...
-    9*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
-    10*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
-    11*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
-    12*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd'))))];
+for c = 1:nContrasts
+    currentContrast = contrastLabels{c};
+    allControlTrajectories_emotionid_currentContrast = allControlTrajectories_emotionid(strcmp(allControlTrajectories_emotionid.contrast, currentContrast), :); % extracting table for current contrast
     
-positions = [1, 1.2, 1.4, 1.6, 2, 2.2, 2.4, 2.6, 3, 3.2, 3.4, 3.6];
-
-boxplot(x, groups, 'positions', positions, 'OutlierSize', 8, 'Symbol', 'k.');
-set(gca, 'XTickLabel', {'P', 'A', 'P', 'A', 'P', 'A', 'P', 'A', 'P', 'A', 'P', 'A'});
-
-%set(gca,'xtick',[])
-color = repmat({[0.4660, 0.6740, 0.1880], [0.4660, 0.6740, 0.1880], [0.4940, 0.1840, 0.5560], [0.4940, 0.1840, 0.5560]}, 1, 3); % right to left
-faceAlpha = repmat([0.75, 0.25], 1, 6); % right to left
-h = findobj(gca,'Tag','Box');
-for j=1:length(h)
-   currentFaceAlpha = faceAlpha(j); 
-   patch(get(h(j), 'XData'), get(h(j), 'YData'), color{j}, 'FaceAlpha', currentFaceAlpha);
+    controlImpact_emotionid = allControlTrajectories_emotionid_currentContrast.controlImpact_persistence; % extracting control impact
+    parcelsToInclude_emotionrec = allControlTrajectories_emotionid_currentContrast.parcelsToInclude_idx; % extracting parcel indices in imaging slab
+    nIterations = numel(controlImpact_emotionid);
+    
+    % populate matrix of control impact for [nSubjects*2 x nNodes]
+    controlImpact_emotionid_allSubjects = NaN(nIterations, nNodes);
+    for i = 1:nIterations
+        current_parcelsToInclude_idx = parcelsToInclude_emotionrec{i};
+        current_controlImpact_emotionid = controlImpact_emotionid{i};
+        controlImpact_emotionid_allSubjects(i, current_parcelsToInclude_idx) = current_controlImpact_emotionid;
+    end
+    
+    avgeControlImpact_emotionid_currentContrast_allSubjects = mean(controlImpact_emotionid_allSubjects); % averaging over all subjects
+    avgeControlImpact_emotionid_currentContrast_allSubjects(isnan(avgeControlImpact_emotionid_currentContrast_allSubjects)) = 0; % setting NaN values (outside slab) to 0
+    avgeControlImpact_emotionid_allSubjects(:, c) = avgeControlImpact_emotionid_currentContrast_allSubjects;
 end
 
-ylabel('persistence energy')
-ylim([0.2, 0.65]);
+avgeControlImpact_emotionid_allSubjects = mean(avgeControlImpact_emotionid_allSubjects, 2); % averaging over all contrasts
+
+emotionid_controlImpact_nodeNames = cell(234, 2);
+for i = 1:234
+    emotionid_controlImpact_nodeNames{i, 1} = avgeControlImpact_emotionid_allSubjects(i);
+    emotionid_controlImpact_nodeNames{i, 2} = LausanneParcelNames{i};
+end
+
+emotionid_controlImpact_nodeNames = sortrows(emotionid_controlImpact_nodeNames, 'descend'); % sorting nodes by descending control impact value
+emotionid_controlImpact_nodeNames = cell2table(emotionid_controlImpact_nodeNames, 'VariableNames', {'controlImpact_sorted', 'nodeName_Lausanne'});
+writetable(emotionid_controlImpact_nodeNames, strcat(resultsDir, 'emotionid_controlImpact_nodeNames.csv'));
+
+[~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionid_allSubjects, hot, [0 1.5]);
+view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
+view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(1), 'off'); axis(ax(2), 'off');
+figure; [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionid_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5);
+close(f_lat);
+[~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionid_allSubjects, hot, [0 1.5]);
+view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
+view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(1), 'off'); axis(ax(2), 'off');
+figure; [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionid_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5);
+close(f_lat);
+
+%% emotionrec
+
+avgeControlImpact_emotionrec_allSubjects = zeros(nNodes, nContrasts);
+
+for c = 1:nContrasts
+    currentContrast = contrastLabels{c};
+    allControlTrajectories_emotionrec_currentContrast = allControlTrajectories_emotionrec(strcmp(allControlTrajectories_emotionrec.contrast, currentContrast), :); % extracting table for current contrast
+    
+    controlImpact_emotionrec = allControlTrajectories_emotionrec_currentContrast.controlImpact_persistence; % extracting control impact
+    parcelsToInclude_emotionrec = allControlTrajectories_emotionrec_currentContrast.parcelsToInclude_idx; % extracting parcel indices in imaging slab
+    nIterations = numel(controlImpact_emotionrec);
+    
+    % populate matrix of control impact for [nSubjects*2 x nNodes]
+    controlImpact_emotionrec_allSubjects = NaN(nIterations, nNodes);
+    for i = 1:nIterations
+        current_parcelsToInclude_idx = parcelsToInclude_emotionrec{i};
+        current_controlImpact_emotionrec = controlImpact_emotionrec{i};
+        controlImpact_emotionrec_allSubjects(i, current_parcelsToInclude_idx) = current_controlImpact_emotionrec;
+    end
+    
+    avgeControlImpact_emotionrec_currentContrast_allSubjects = mean(controlImpact_emotionrec_allSubjects);
+    avgeControlImpact_emotionrec_currentContrast_allSubjects(isnan(avgeControlImpact_emotionrec_currentContrast_allSubjects)) = 0;
+    
+    avgeControlImpact_emotionrec_allSubjects(:, c) = avgeControlImpact_emotionrec_currentContrast_allSubjects;
+end
+
+avgeControlImpact_emotionrec_allSubjects = mean(avgeControlImpact_emotionrec_allSubjects, 2);
+
+emotionrec_controlImpact_nodeNames = cell(234, 2);
+for i = 1:234
+    emotionrec_controlImpact_nodeNames{i, 1} = avgeControlImpact_emotionrec_allSubjects(i);
+    emotionrec_controlImpact_nodeNames{i, 2} = LausanneParcelNames{i};
+end
+
+emotionrec_controlImpact_nodeNames = sortrows(emotionrec_controlImpact_nodeNames, 'descend');
+emotionrec_controlImpact_nodeNames = cell2table(emotionrec_controlImpact_nodeNames, 'VariableNames', {'controlImpact_sorted', 'nodeName_Lausanne'});
+writetable(emotionrec_controlImpact_nodeNames, strcat(resultsDir, 'emotionrec_controlImpact_nodeNames.csv'));
+
+[~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionrec_allSubjects, hot, [0 1.5]);
+view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
+view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(1), 'off'); axis(ax(2), 'off');
+figure; [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionrec_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5);
+close(f_lat);
+[~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionrec_allSubjects, hot, [0 1.5]);
+view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
+view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(1), 'off'); axis(ax(2), 'off');
+figure; [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionrec_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5);
+close(f_lat);
+
+%% Figure 3
+
+%% plotting SISTOTAL and STAI_TRAIT against persistence_allNodes for nonthreat emotionid
+
+contrast = allControlEnergies_emotionid.contrast;
+allControlEnergies_emotionid_nonthreat = allControlEnergies_emotionid(strcmp(contrast, 'contrast3_nonthreatcorrectStd'), :);
+persistence_allNodes_nonthreat = allControlEnergies_emotionid_nonthreat.persistence_allNodes;
+allControlEnergies_emotionid_neutral = allControlEnergies_emotionid(strcmp(contrast, 'contrast5_neutralcorrectStd'), :);
+persistence_allNodes_neutral = allControlEnergies_emotionid_neutral.persistence_allNodes;
+SISTOTAL = allControlEnergies_emotionid_nonthreat.SISTOTAL;
+STAI_TRAIT = allControlEnergies_emotionid_nonthreat.STAI_TRAIT;
+
+figure; set(gcf, 'color', 'white');
+plot(SISTOTAL, persistence_allNodes_nonthreat, 'k.', 'MarkerSize', 20);
+h = lsline; h.LineWidth = 2;
+xlabel('SISTOTAL');
+ylabel('persistence energy - nonthreat');
 set(gca, 'FontSize', 20);
+[rho, pValue] = corr(SISTOTAL, persistence_allNodes_nonthreat, 'Rows', 'Complete')
+ylim([0.2, 0.65]);
+
+drug = allControlEnergies_emotionid_nonthreat.drug;
+
+figure; set(gcf, 'color', 'w'); set(gca, 'FontSize', 20); hold on;
+plot(STAI_TRAIT(drug==1), persistence_allNodes_neutral(drug==1), 'r.', 'MarkerSize', 20);
+plot(STAI_TRAIT(drug==0), persistence_allNodes_neutral(drug==0), 'b.', 'MarkerSize', 20);
+lsline;
+h = lsline; h(1).LineWidth = 2; h(2).LineWidth = 2; 
+xlabel('trait anxiety');
+ylabel('persistence energy - neutral');
+legend('placebo', 'alpraz', 'location', 'northeast'); legend boxoff;
+[rho, pValue] = corr(STAI_TRAIT(drug==0), persistence_allNodes_neutral(drug==0), 'Rows', 'Complete')
+[rho, pValue] = corr(STAI_TRAIT(drug==1), persistence_allNodes_neutral(drug==1), 'Rows', 'Complete')
+ylim([0.2, 0.65]);
 
 %% mixed models for accuracy and reaction time versus persistence for emotionid and emotionrec
 
@@ -461,8 +522,6 @@ lsline
 xlabel('accuracy - threat emotionrec');
 ylabel('persistence');
 legend('placebo', 'alpraz', 'location', 'northoutside'); legend boxoff;
-
-%% Figure 3
 
 %% plot GABA(A) receptor expression
 
@@ -630,90 +689,7 @@ for c = 1:nContrasts
     saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlImpactGroupDrugInteraction_GABA.svg'));
 end
 
-%% calculating average control impact across all subjects
-
-% emotionid
-avgeControlImpact_emotionid_allSubjects = zeros(nNodes, nContrasts);
-
-for c = 1:nContrasts
-    currentContrast = contrastLabels{c};
-    allControlTrajectories_emotionid_currentContrast = allControlTrajectories_emotionid(strcmp(allControlTrajectories_emotionid.contrast, currentContrast), :); % extracting table for current contrast
-    
-    controlImpact_emotionid = allControlTrajectories_emotionid_currentContrast.controlImpact_persistence; % extracting control impact
-    parcelsToInclude_emotionrec = allControlTrajectories_emotionid_currentContrast.parcelsToInclude_idx; % extracting parcel indices in imaging slab
-    nIterations = numel(controlImpact_emotionid);
-    
-    % populate matrix of control impact for [nSubjects*2 x nNodes]
-    controlImpact_emotionid_allSubjects = NaN(nIterations, nNodes);
-    for i = 1:nIterations
-        current_parcelsToInclude_idx = parcelsToInclude_emotionrec{i};
-        current_controlImpact_emotionid = controlImpact_emotionid{i};
-        controlImpact_emotionid_allSubjects(i, current_parcelsToInclude_idx) = current_controlImpact_emotionid;
-    end
-    
-    avgeControlImpact_emotionid_currentContrast_allSubjects = mean(controlImpact_emotionid_allSubjects);
-    avgeControlImpact_emotionid_currentContrast_allSubjects(isnan(avgeControlImpact_emotionid_currentContrast_allSubjects)) = 0;
-    
-    controlImpact_nodeNames = cell(234, 2);
-    for i = 1:234
-        controlImpact_nodeNames{i, 1} = avgeControlImpact_emotionid_currentContrast_allSubjects(i);
-        controlImpact_nodeNames{i, 2} = LausanneParcelNames{i};
-    end
-    
-    controlImpact_nodeNames = sortrows(controlImpact_nodeNames);
-    controlImpact_nodeNames{230:end, :}
-    
-    avgeControlImpact_emotionid_allSubjects(:, c) = avgeControlImpact_emotionid_currentContrast_allSubjects;
-end
-
-% emotionrec
-avgeControlImpact_emotionrec_allSubjects = zeros(nNodes, nContrasts);
-
-for c = 1:nContrasts
-    currentContrast = contrastLabels{c};
-    allControlTrajectories_emotionrec_currentContrast = allControlTrajectories_emotionrec(strcmp(allControlTrajectories_emotionrec.contrast, currentContrast), :); % extracting table for current contrast
-    
-    controlImpact_emotionrec = allControlTrajectories_emotionrec_currentContrast.controlImpact_persistence; % extracting control impact
-    parcelsToInclude_emotionrec = allControlTrajectories_emotionrec_currentContrast.parcelsToInclude_idx; % extracting parcel indices in imaging slab
-    nIterations = numel(controlImpact_emotionrec);
-    
-    % populate matrix of control impact for [nSubjects*2 x nNodes]
-    controlImpact_emotionrec_allSubjects = NaN(nIterations, nNodes);
-    for i = 1:nIterations
-        current_parcelsToInclude_idx = parcelsToInclude_emotionrec{i};
-        current_controlImpact_emotionrec = controlImpact_emotionrec{i};
-        controlImpact_emotionrec_allSubjects(i, current_parcelsToInclude_idx) = current_controlImpact_emotionrec;
-    end
-    
-    avgeControlImpact_emotionrec_currentContrast_allSubjects = mean(controlImpact_emotionrec_allSubjects);
-    avgeControlImpact_emotionrec_currentContrast_allSubjects(isnan(avgeControlImpact_emotionrec_currentContrast_allSubjects)) = 0;
-    
-    controlImpact_nodeNames = cell(234, 2);
-    for i = 1:234
-        controlImpact_nodeNames{i, 1} = avgeControlImpact_emotionrec_currentContrast_allSubjects(i);
-        controlImpact_nodeNames{i, 2} = LausanneParcelNames{i};
-    end
-    
-    controlImpact_nodeNames = sortrows(controlImpact_nodeNames);
-    controlImpact_nodeNames{230:end, :}
-    
-    avgeControlImpact_emotionrec_allSubjects(:, c) = avgeControlImpact_emotionrec_currentContrast_allSubjects;
-end
-
-%     [~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionrec_currentContrast_allSubjects, hot, [0 1.5]);
-%     view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
-%     view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
-%     axis(ax(1), 'off'); axis(ax(2), 'off');
-%     [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionrec_currentContrast_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5); 
-%     close(f_lat);
-%     [~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionrec_currentContrast_allSubjects, hot, [0 1.5]);
-%     view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
-%     view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
-%     axis(ax(1), 'off'); axis(ax(2), 'off');
-%     [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionrec_currentContrast_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5); 
-%     close(f_lat);
-
-%% control input calculations
+%% control input vs GABA calculations
 
 nTimeSteps = 1001;
 for c = 1:nContrasts
