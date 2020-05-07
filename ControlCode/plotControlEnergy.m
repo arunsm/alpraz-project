@@ -137,7 +137,7 @@ axis(ax(1), 'off'); axis(ax(2), 'off');
 
 %% Figure 2
 
-%% creating mixed models to examine effects of clinical and demographic variables on persistence during emotionid
+%% creating mixed models to examine effects of clinical and demographic variables on persistence_allNodes during emotionid
 
 contrast = allControlEnergies_emotionid.contrast;
 
@@ -523,10 +523,341 @@ xlabel('accuracy - threat emotionrec');
 ylabel('persistence');
 legend('placebo', 'alpraz', 'location', 'northoutside'); legend boxoff;
 
+%% plot PET neurotransmitter profiles
+
+PETlabels = {'5HT1a_WAY_HC36', '5HT1b_P943_HC22', '5HT2a_ALT_HC19', 'D1_SCH23390_c11', 'D2_RACLOPRIDE_c11', 'DAT_DATSPECT.nii', 'FDOPA_f18', 'GABAa_FLUMAZENIL_c11', 'NAT_MRB_c11', 'SERT_DASB_HC30'};
+
+% load PET data
+PETdir = '/Users/ArunMahadevan/Documents/BBL/studies/alpraz/PETatlas/';
+X = importdata(strcat(PETdir, '5HT1a_WAY_HC36.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_5HT1a_WAY_HC36 = X.data';
+X = importdata(strcat(PETdir, '5HT1b_P943_HC22.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_5HT1b_P943_HC22 = X.data';
+X = importdata(strcat(PETdir, '5HT2a_ALT_HC19.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_5HT2a_ALT_HC19 = X.data';
+X = importdata(strcat(PETdir, 'D1_SCH23390_c11.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_D1_SCH23390_c11 = X.data';
+X = importdata(strcat(PETdir, 'D2_RACLOPRIDE_c11.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_D2_RACLOPRIDE_c11 = X.data';
+X = importdata(strcat(PETdir, 'DAT_DATSPECT.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_DAT_DATSPECT = X.data';
+X = importdata(strcat(PETdir, 'FDOPA_f18.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_FDOPA_f18 = X.data';
+X = importdata(strcat(PETdir, 'GABAa_FLUMAZENIL_c11.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_GABAa_FLUMAZENIL_c11 = X.data';
+X = importdata(strcat(PETdir, 'NAT_MRB_c11.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_NAT_MRB_c11 = X.data';
+X = importdata(strcat(PETdir, 'SERT_DASB_HC30.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
+PET_SERT_DASB_HC30 = X.data';
+
+[f, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, hot, [10 80]); close(f(2)); % plotting only right hemisphere
+view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
+axis(ax(1), 'off'); colorbar;
+[g, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, hot, [10 80]); close(g(2)); % plotting only right hemisphere
+view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
+axis(ax(1), 'off'); colorbar;
+
+[f, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, hot, [10 80]); close(f(1)); % plotting only left hemisphere
+view(ax(2), [-90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(2), 'off'); colorbar;
+[g, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, hot, [10 80]); close(g(1)); % plotting only left hemisphere
+view(ax(2), [-270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(2), 'off'); colorbar;
+
+figure;
+[~,f_lat] = plot_subcortvol(PET_GABAa_FLUMAZENIL_c11(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 10, 80); % visualizing sub-cortical areas
+close(f_lat); colorbar;
+
+%% average control impact w/ and w/o drug vs PET neurotransmitter maps - emotionid
+
+for c = 1:nContrasts
+    currentContrast = contrastLabels{c};
+    allControlTrajectories_emotionid_currentContrast = allControlTrajectories_emotionid(strcmp(allControlTrajectories_emotionid.contrast, currentContrast), :); % extracting table for current contrast
+    
+    controlImpact_emotionid = allControlTrajectories_emotionid_currentContrast.controlImpact_persistence; % extracting control impact
+    parcelsToInclude_emotionid = allControlTrajectories_emotionid_currentContrast.parcelsToInclude_idx; % extracting parcel indices in imaging slab
+    nIterations = numel(controlImpact_emotionid);
+    drug = allControlTrajectories_emotionid_currentContrast.drug;
+    group = allControlTrajectories_emotionid_currentContrast.group;
+    
+    % populate matrix of control impact for [nSubjects*2 x nNodes]
+    controlImpact_emotionid_allSubjects = NaN(nIterations, nNodes);
+    for i = 1:nIterations
+        current_parcelsToInclude_idx = parcelsToInclude_emotionid{i};
+        current_controlImpact_emotionid = controlImpact_emotionid{i};
+        controlImpact_emotionid_allSubjects(i, current_parcelsToInclude_idx) = current_controlImpact_emotionid;
+    end
+    
+    controlImpactDiff_emotionid_currentContrast_drug = controlImpact_emotionid_allSubjects(drug==0, :) - controlImpact_emotionid_allSubjects(drug==1, :);
+        
+    % compute correlations between control impact differences w/ and w/o drug against PET
+    % maps
+    controlImpactDiff_emotionid_currentContrast_drug_PETatlasCorrs = [corr(controlImpactDiff_emotionid_currentContrast_drug', PET_5HT1a_WAY_HC36, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionid_currentContrast_drug', PET_5HT1b_P943_HC22, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionid_currentContrast_drug', PET_5HT2a_ALT_HC19, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionid_currentContrast_drug', PET_D1_SCH23390_c11, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionid_currentContrast_drug', PET_D2_RACLOPRIDE_c11, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionid_currentContrast_drug', PET_DAT_DATSPECT, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionid_currentContrast_drug', PET_FDOPA_f18, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionid_currentContrast_drug', PET_GABAa_FLUMAZENIL_c11, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionid_currentContrast_drug', PET_NAT_MRB_c11, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionid_currentContrast_drug', PET_SERT_DASB_HC30, 'Rows', 'Complete')];
+    
+    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+    set(gca, 'FontSize', 20);
+    
+    boxplot(atanh(controlImpactDiff_emotionid_currentContrast_drug_PETatlasCorrs), 'Labels', PETlabels, 'LabelOrientation', 'inline');
+    refline(0, 0);
+    
+    ylabel('Fisher z (Spearman \rho)');
+    saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlImpactDiffDrug_PETatlases.svg'));
+    
+end
+
+%% average control impact w/ and w/o drug vs PET neurotransmitter maps - emotionrec
+
+for c = 1:nContrasts
+    currentContrast = contrastLabels{c};
+    allControlTrajectories_emotionrec_currentContrast = allControlTrajectories_emotionrec(strcmp(allControlTrajectories_emotionrec.contrast, currentContrast), :); % extracting table for current contrast
+    
+    controlImpact_emotionrec = allControlTrajectories_emotionrec_currentContrast.controlImpact_persistence; % extracting control impact
+    parcelsToInclude_emotionrec = allControlTrajectories_emotionrec_currentContrast.parcelsToInclude_idx; % extracting parcel indices in imaging slab
+    nIterations = numel(controlImpact_emotionrec);
+    drug = allControlTrajectories_emotionrec_currentContrast.drug;
+    group = allControlTrajectories_emotionrec_currentContrast.group;
+    
+    % populate matrix of control impact for [nSubjects*2 x nNodes]
+    controlImpact_emotionrec_allSubjects = NaN(nIterations, nNodes);
+    for i = 1:nIterations
+        current_parcelsToInclude_idx = parcelsToInclude_emotionrec{i};
+        current_controlImpact_emotionrec = controlImpact_emotionrec{i};
+        controlImpact_emotionrec_allSubjects(i, current_parcelsToInclude_idx) = current_controlImpact_emotionrec;
+    end
+    
+    controlImpactDiff_emotionrec_currentContrast_drug = controlImpact_emotionrec_allSubjects(drug==0, :) - controlImpact_emotionrec_allSubjects(drug==1, :);
+        
+    % compute correlations between control impact differences w/ and w/o drug against PET
+    % maps
+    controlImpactDiff_emotionrec_currentContrast_drug_PETatlasCorrs = [corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_5HT1a_WAY_HC36, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_5HT1b_P943_HC22, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_5HT2a_ALT_HC19, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_D1_SCH23390_c11, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_D2_RACLOPRIDE_c11, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_DAT_DATSPECT, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_FDOPA_f18, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_GABAa_FLUMAZENIL_c11, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_NAT_MRB_c11, 'Rows', 'Complete'), ...
+        corr(controlImpactDiff_emotionrec_currentContrast_drug', PET_SERT_DASB_HC30, 'Rows', 'Complete')];
+    
+    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+    set(gca, 'FontSize', 20);
+    
+    boxplot(atanh(controlImpactDiff_emotionrec_currentContrast_drug_PETatlasCorrs), 'Labels', PETlabels, 'LabelOrientation', 'inline');
+    refline(0, 0);
+    
+    ylabel('Fisher z (Spearman \rho)');
+    saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlImpactDiffDrug_PETatlases.svg'));
+    
+end
+
+%% control impact beta coefficients vs PET neurotransmitter maps - emotionid
+
+for c = 1:nContrasts
+    currentContrast = contrastLabels{c};
+    allControlTrajectories_emotionid_currentContrast = allControlTrajectories_emotionid(strcmp(allControlTrajectories_emotionid.contrast, currentContrast), :); % extracting table for current contrast
+    
+    controlImpact_emotionid = allControlTrajectories_emotionid_currentContrast.controlImpact_persistence; % extracting control impact
+    parcelsToInclude_emotionid = allControlTrajectories_emotionid_currentContrast.parcelsToInclude_idx; % extracting parcel indices in imaging slab
+    nIterations = numel(controlImpact_emotionid);
+    
+    % populate matrix of control impact for [nSubjects*2 x nNodes]
+    controlImpact_emotionid_allSubjects = NaN(nIterations, nNodes);
+    for i = 1:nIterations
+        current_parcelsToInclude_idx = parcelsToInclude_emotionid{i};
+        current_controlImpact_emotionid = controlImpact_emotionid{i};
+        controlImpact_emotionid_allSubjects(i, current_parcelsToInclude_idx) = current_controlImpact_emotionid;
+    end
+    
+    % evaluate effects of drug and group on control impact of each node
+    betas_groupMain = NaN(nNodes, 1); pValues_groupMain = NaN(nNodes, 1);
+    betas_drugMain = NaN(nNodes, 1); pValues_drugMain = NaN(nNodes, 1);
+    betas_groupDrugInteraction = NaN(nNodes, 1); pValues_groupDrugInteraction = NaN(nNodes, 1);
+    
+    for i = 1:nNodes
+        %fprintf('node%d\n', i);
+        controlImpact_currentNode = controlImpact_emotionid_allSubjects(:, i);
+        controlImpact_currentNode =  zscore(controlImpact_currentNode);
+        if sum(isnan(controlImpact_currentNode)) > 0 % how much missing data am I willing to tolerate?
+            continue;
+        else
+            allControlTrajectories_currentNode = addvars(allControlTrajectories_emotionid_currentContrast, controlImpact_currentNode); % creating table with additional variable
+            controlImpactModel = fitlme(allControlTrajectories_currentNode, 'controlImpact_currentNode ~ drug + group + drug*group + (1|subjectID)', 'FitMethod', 'REML'); % fitting mixed model
+            coefficientNames = controlImpactModel.CoefficientNames; coefficients = controlImpactModel.Coefficients.Estimate; pValues = controlImpactModel.Coefficients.pValue; % extracting coefficients and p-values
+            betas_groupMain(i) = coefficients(strcmp(coefficientNames, 'group')); betas_drugMain(i) = coefficients(strcmp(coefficientNames, 'drug')); betas_groupDrugInteraction(i) = coefficients(strcmp(coefficientNames, 'group:drug'));
+            pValues_groupMain(i) = pValues(strcmp(coefficientNames, 'group')); pValues_drugMain(i) = pValues(strcmp(coefficientNames, 'drug')); pValues_groupDrugInteraction(i) = pValues(strcmp(coefficientNames, 'group:drug'));
+        end
+    end
+    
+    pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true); 
+    pValues_drugMain_FDR = mafdr(pValues_drugMain, 'BHFDR', true);
+    pValues_groupDrugInteraction_FDR = mafdr(pValues_groupDrugInteraction, 'BHFDR', true);
+    
+    sum(pValues_groupMain_FDR < 0.05/234)
+    sum(pValues_drugMain_FDR < 0.05/234)
+    sum(pValues_groupDrugInteraction_FDR < 0.05/234)
+    
+    % plotting coefficients of group main effect versus PET
+    % neurotransmitter profiles
+    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+    set(gca, 'FontSize', 20);
+
+    xlim([-1, 1]);
+    ylim([10, 80]);
+    
+    plot(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
+    [rho, pVal_corr] = corr(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
+    text(-0.9, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+        
+    lsline;
+    xlabel('coefficients of group main effect');
+    ylabel('GABA receptor density');
+    saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlImpactGroupEffect_GABA.svg'));
+    
+    % plotting coefficients of drug main effect versus PET
+    % neurotransmitter profiles
+    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+    set(gca, 'FontSize', 20);
+    
+    xlim([-1, 1]);
+    ylim([10, 80]);
+    
+    plot(betas_drugMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
+    [rho, pVal_corr] = corr(betas_drugMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
+    text(-0.9, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+    
+    lsline;
+    xlabel('coefficients of drug main effect');
+    ylabel('GABA receptor density');
+    saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlImpactDrugEffect_GABA.svg'));
+    
+    % plotting coefficients of drug x group interaction versus GABA receptor expression
+    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+    set(gca, 'FontSize', 20);
+    
+    xlim([-1, 1]);
+    ylim([10, 80]);
+    
+    plot(betas_groupDrugInteraction, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
+    [rho, pVal_corr] = corr(betas_groupDrugInteraction, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
+    text(-0.9, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+    
+    lsline;
+    xlabel('coefficients of group x drug interaction');
+    ylabel('GABA receptor density');
+    saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlImpactGroupDrugInteraction_GABA.svg'));
+end
+
+%% control impact vs PET neurotransmitter maps - emotionrec
+
+for c = 1:nContrasts
+    currentContrast = contrastLabels{c};
+    allControlTrajectories_emotionrec_currentContrast = allControlTrajectories_emotionrec(strcmp(allControlTrajectories_emotionrec.contrast, currentContrast), :); % extracting table for current contrast
+    
+    controlImpact_emotionrec = allControlTrajectories_emotionrec_currentContrast.controlImpact_persistence; % extracting control impact
+    parcelsToInclude_emotionrec = allControlTrajectories_emotionrec_currentContrast.parcelsToInclude_idx; % extracting parcel indices in imaging slab
+    nIterations = numel(controlImpact_emotionrec);
+    
+    % populate matrix of control impact for [nSubjects*2 x nNodes]
+    controlImpact_emotionrec_allSubjects = NaN(nIterations, nNodes);
+    for i = 1:nIterations
+        current_parcelsToInclude_idx = parcelsToInclude_emotionrec{i};
+        current_controlImpact_emotionrec = controlImpact_emotionrec{i};
+        controlImpact_emotionrec_allSubjects(i, current_parcelsToInclude_idx) = current_controlImpact_emotionrec;
+    end
+    
+    % evaluate effects of drug and group on control impact of each node
+    betas_groupMain = NaN(nNodes, 1); pValues_groupMain = NaN(nNodes, 1);
+    betas_drugMain = NaN(nNodes, 1); pValues_drugMain = NaN(nNodes, 1);
+    betas_groupDrugInteraction = NaN(nNodes, 1); pValues_groupDrugInteraction = NaN(nNodes, 1);
+    
+    for i = 1:nNodes
+        %fprintf('node%d\n', i);
+        controlImpact_currentNode = controlImpact_emotionrec_allSubjects(:, i);
+        controlImpact_currentNode =  zscore(controlImpact_currentNode);
+        if sum(isnan(controlImpact_currentNode)) > 0 % how much missing data am I willing to tolerate?
+            continue;
+        else
+            allControlTrajectories_currentNode = addvars(allControlTrajectories_emotionrec_currentContrast, controlImpact_currentNode); % creating table with additional variable
+            controlImpactModel = fitlme(allControlTrajectories_currentNode, 'controlImpact_currentNode ~ drug + group + drug*group + (1|subjectID)', 'FitMethod', 'REML'); % fitting mixed model
+            coefficientNames = controlImpactModel.CoefficientNames; coefficients = controlImpactModel.Coefficients.Estimate; pValues = controlImpactModel.Coefficients.pValue; % extracting coefficients and p-values
+            betas_groupMain(i) = coefficients(strcmp(coefficientNames, 'group')); betas_drugMain(i) = coefficients(strcmp(coefficientNames, 'drug')); betas_groupDrugInteraction(i) = coefficients(strcmp(coefficientNames, 'group:drug'));
+            pValues_groupMain(i) = pValues(strcmp(coefficientNames, 'group')); pValues_drugMain(i) = pValues(strcmp(coefficientNames, 'drug')); pValues_groupDrugInteraction(i) = pValues(strcmp(coefficientNames, 'group:drug'));
+        end
+    end
+    
+    pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true); 
+    pValues_drugMain_FDR = mafdr(pValues_drugMain, 'BHFDR', true);
+    pValues_groupDrugInteraction_FDR = mafdr(pValues_groupDrugInteraction, 'BHFDR', true);
+    
+    sum(pValues_groupMain_FDR < 0.05/234)
+    sum(pValues_drugMain_FDR < 0.05/234)
+    sum(pValues_groupDrugInteraction_FDR < 0.05/234)
+    
+    % plotting coefficients of group main effect versus PET
+    % neurotransmitter profiles
+    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+    set(gca, 'FontSize', 20);
+
+    xlim([-1, 1]);
+    ylim([10, 80]);
+    
+    plot(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
+    [rho, pVal_corr] = corr(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
+    text(-0.9, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+        
+    lsline;
+    xlabel('coefficients of group main effect');
+    ylabel('GABA receptor density');
+    saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlImpactGroupEffect_GABA.svg'));
+    
+    % plotting coefficients of drug main effect versus PET
+    % neurotransmitter profiles
+    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+    set(gca, 'FontSize', 20);
+    
+    xlim([-1, 1]);
+    ylim([10, 80]);
+    
+    plot(betas_drugMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
+    [rho, pVal_corr] = corr(betas_drugMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
+    text(-0.9, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+    
+    lsline;
+    xlabel('coefficients of drug main effect');
+    ylabel('GABA receptor density');
+    saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlImpactDrugEffect_GABA.svg'));
+    
+    % plotting coefficients of drug x group interaction versus GABA receptor expression
+    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+    set(gca, 'FontSize', 20);
+    
+    xlim([-1, 1]);
+    ylim([10, 80]);
+    
+    plot(betas_groupDrugInteraction, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
+    [rho, pVal_corr] = corr(betas_groupDrugInteraction, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
+    text(-0.9, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+    
+    lsline;
+    xlabel('coefficients of group x drug interaction');
+    ylabel('GABA receptor density');
+    saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlImpactGroupDrugInteraction_GABA.svg'));
+end
+
 %% plot GABA(A) receptor expression
 
 % calculate GABA gene expression from Allen human brain atlas data
-load('GeneExpression/ParcellatedGeneExpressionLausanne125.mat');
+load('/Users/ArunMahadevan/Documents/BBL/studies/alpraz/GeneExpression/ParcellatedGeneExpressionLausanne125.mat');
 GABRA1 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRA1'));
 GABRA2 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRA2'));
 GABRA3 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRA3'));
