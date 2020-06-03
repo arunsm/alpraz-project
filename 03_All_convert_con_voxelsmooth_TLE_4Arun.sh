@@ -58,7 +58,7 @@ do
 		mul 10000 --o ${OUT2}/${map%.nii}_bbr_rh_10000.mgh
 		
 		# the following surf2surf applies smoothing - left hemisphere
-		#don't do if using already smoothed data
+		#don't do if using already smoothed data; move to target space
 		mri_surf2surf --s ${FSFOLDER} \
 		--sval ${OUT2}/${map%.nii}_bbr_lh_10000.mgh \
 		--trgsubject fsaverage5 \
