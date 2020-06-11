@@ -4,9 +4,10 @@ clear all;
 
 addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/beeswarm-master'));
 addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/LausanneSurfaceFigures'));
-addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/LausanneCoordinates'))
+addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/LausanneCoordinates'));
+addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/mult_comp_perm_t1'));
 
-resultsDir = 'Results/minimalControl/avge_FD_thresh_0.5_parcelCoverageThresh_0.5_EuclideanNorm_allNodes_QA/';
+resultsDir = 'Results/minimalControl/avge_FD_thresh_0.5_parcelCoverageThresh_0.5_none_allNodes_QA_betas/';
 
 allControlEnergies_emotionid = readtable(strcat(resultsDir, 'allControlEnergies_emotionid.csv'));
 allControlEnergies_emotionrec = readtable(strcat(resultsDir, 'allControlEnergies_emotionrec.csv'));
@@ -99,9 +100,9 @@ fprintf('range: %.1f-%.1f\n', min(subjectDemographics.SISTOTAL(group==1)), max(s
 
 %% Figure 1
 
-% plot structural matrix
+%% plot structural matrix
 
-figure; set(gcf, 'color', 'w');
+figure; set(gcf, 'color', 'w'); hold on;
 imagesc(A);
 colormap('parula');
 colorbar;
@@ -109,7 +110,12 @@ axis off;
 ax = gca;
 ax.FontSize = 12;
 
-% Figure depicting Lausanne parcellation
+% h = refline(0, 234-109); h.Color = 'r';
+% h = refline(0, 234-115); h.Color = 'r';
+% h = refline(0, 234-227); h.Color = 'r';
+% h = refline(0, 234-234); h.Color = 'r';
+
+%% Figure depicting Lausanne parcellation
 
 parcelValues = zeros(234, 1);
 [~, ax, ph, ~] = fcn_lausannesurf(parcelValues, white, [-20 100]);
@@ -117,11 +123,14 @@ view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight');
 view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');
 
-% plot brain activation maps w/ and w/o alpraz for individual subject
+%% plot brain activation maps w/ and w/o alpraz for individual subject
 
-M = importdata('/Users/ArunMahadevan/Documents/BBL/studies/alpraz/derivatives/xcp_output_allTasks2/sub-010707/ses-001989/task-emotionid/norm/sub-010707_ses-001989_task-emotionid_contrast1_threatcorrectStd_lausanne_ROIv_scale125_dilated.txt');
-brainStates_alpraz = M.data';
-[~, ax, ph, ~] = fcn_lausannesurf(brainStates_alpraz, hot, [-20 100]);
+brainStates_alpraz = nan(234, 1);
+xf = allControlTrajectories_emotionid.xf{1};
+parcelsToInclude_idx = allControlTrajectories_emotionid.parcelsToInclude_idx{1};
+brainStates_alpraz(parcelsToInclude_idx) = xf;
+
+[~, ax, ph, ~] = fcn_lausannesurf(brainStates_alpraz, hot);
 view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');
@@ -151,7 +160,7 @@ for i = 1:nContrasts
     allControlEnergies_emotionid_currentContrast.gender = categorical(allControlEnergies_emotionid_currentContrast.gender);
     
     % fitting model after checking for normality
-    persistence_allNodes = allControlEnergies_emotionid_currentContrast.persistence_allNodes; 
+    persistence_allNodes = allControlEnergies_emotionid_currentContrast.persistence_allNodes;
     h = kstest(zscore(persistence_allNodes));
     figure, histogram(persistence_allNodes); title(strcat('KS test: ', num2str(h)));
     mixedModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'persistence_allNodes ~ drug + group + drug*group + STAI_TRAIT*drug + SISTOTAL + gender + age + (1|subjectID)', 'FitMethod', 'REML')
@@ -214,7 +223,7 @@ groups = [ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & 
     10*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
     11*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
     12*ones(size(allControlEnergies_emotionid.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd'))))];
-    
+
 positions = [1, 1.2, 1.4, 1.6, 2, 2.2, 2.4, 2.6, 3, 3.2, 3.4, 3.6];
 
 boxplot(x, groups, 'positions', positions, 'OutlierSize', 8, 'Symbol', 'k.');
@@ -225,12 +234,12 @@ color = repmat({[0.4660, 0.6740, 0.1880], [0.4660, 0.6740, 0.1880], [0.4940, 0.1
 faceAlpha = repmat([0.75, 0.25], 1, 6); % right to left
 h = findobj(gca,'Tag','Box');
 for j=1:length(h)
-   currentFaceAlpha = faceAlpha(j); 
-   patch(get(h(j), 'XData'), get(h(j), 'YData'), color{j}, 'FaceAlpha', currentFaceAlpha);
+    currentFaceAlpha = faceAlpha(j);
+    patch(get(h(j), 'XData'), get(h(j), 'YData'), color{j}, 'FaceAlpha', currentFaceAlpha);
 end
 
 ylabel('persistence energy')
-ylim([0.2, 0.65]);
+%ylim([0.2, 0.65]);
 set(gca, 'FontSize', 20);
 
 %% plot persistence during emotion rec +/- Alpraz for controls and relatives; note that drug(0,1)=(alpraz,placebo)
@@ -268,7 +277,7 @@ groups = [ones(size(allControlEnergies_emotionrec.persistence_allNodes(drug==1 &
     10*ones(size(allControlEnergies_emotionrec.persistence_allNodes(drug==0 & group==0 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
     11*ones(size(allControlEnergies_emotionrec.persistence_allNodes(drug==1 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd')))); ...
     12*ones(size(allControlEnergies_emotionrec.persistence_allNodes(drug==0 & group==1 & strcmp(contrast, 'contrast5_neutralcorrectStd'))))];
-    
+
 positions = [1, 1.2, 1.4, 1.6, 2, 2.2, 2.4, 2.6, 3, 3.2, 3.4, 3.6];
 
 boxplot(x, groups, 'positions', positions, 'OutlierSize', 8, 'Symbol', 'k.');
@@ -279,12 +288,12 @@ color = repmat({[0.4660, 0.6740, 0.1880], [0.4660, 0.6740, 0.1880], [0.4940, 0.1
 faceAlpha = repmat([0.75, 0.25], 1, 6); % right to left
 h = findobj(gca,'Tag','Box');
 for j=1:length(h)
-   currentFaceAlpha = faceAlpha(j); 
-   patch(get(h(j), 'XData'), get(h(j), 'YData'), color{j}, 'FaceAlpha', currentFaceAlpha);
+    currentFaceAlpha = faceAlpha(j);
+    patch(get(h(j), 'XData'), get(h(j), 'YData'), color{j}, 'FaceAlpha', currentFaceAlpha);
 end
 
 ylabel('persistence energy')
-ylim([0.2, 0.65]);
+%ylim([0.2, 0.65]);
 set(gca, 'FontSize', 20);
 
 %% calculating and plotting average control impact across all subjects
@@ -416,7 +425,7 @@ figure; set(gcf, 'color', 'w'); set(gca, 'FontSize', 20); hold on;
 plot(STAI_TRAIT(drug==1), persistence_allNodes_neutral(drug==1), 'r.', 'MarkerSize', 20);
 plot(STAI_TRAIT(drug==0), persistence_allNodes_neutral(drug==0), 'b.', 'MarkerSize', 20);
 lsline;
-h = lsline; h(1).LineWidth = 2; h(2).LineWidth = 2; 
+h = lsline; h(1).LineWidth = 2; h(2).LineWidth = 2;
 xlabel('trait anxiety');
 ylabel('persistence energy - neutral');
 legend('placebo', 'alpraz', 'location', 'northeast'); legend boxoff;
@@ -436,20 +445,20 @@ for i = 1:nContrasts
     
     switch currentContrast
         case 'contrast1_threatcorrectStd'
-            figure, histogram(allControlEnergies_emotionid_currentContrast.pctcorr_threat); title('emotionid - pctcorr_threat');
-            figure, histogram(allControlEnergies_emotionid_currentContrast.rtmdn_threatcorr); title('emotionid - rtmdn_threatcorr');
-            accuracyModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'pctcorr_threat ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
+            %figure, histogram(allControlEnergies_emotionid_currentContrast.pctcorr_threat); title('emotionid - pctcorr_threat');
+            %figure, histogram(allControlEnergies_emotionid_currentContrast.rtmdn_threatcorr); title('emotionid - rtmdn_threatcorr');
+            accuracyModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'pctcorr_threat ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML')
             reactionTimeModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'rtmdn_threatcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
         case 'contrast3_nonthreatcorrectStd'
-            figure, histogram(allControlEnergies_emotionid_currentContrast.pctcorr_nonthreat); title('emotionid - pctcorr_nonthreat');
-            figure, histogram(allControlEnergies_emotionid_currentContrast.rtmdn_nonthreatcorr); title('emotionid - rtmdn_nonthreatcorr');
-            accuracyModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'pctcorr_nonthreat ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
+            %figure, histogram(allControlEnergies_emotionid_currentContrast.pctcorr_nonthreat); title('emotionid - pctcorr_nonthreat');
+            %figure, histogram(allControlEnergies_emotionid_currentContrast.rtmdn_nonthreatcorr); title('emotionid - rtmdn_nonthreatcorr');
+            accuracyModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'pctcorr_nonthreat ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML')
             reactionTimeModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'rtmdn_nonthreatcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
         case 'contrast5_neutralcorrectStd'
-           figure, histogram(allControlEnergies_emotionid_currentContrast.pctcorr_neutral); title('emotionid - pctcorr_neutral');
-           figure, histogram(allControlEnergies_emotionid_currentContrast.rtmdn_neutralcorr); title('emotionid - rtmdn_neutralcorr');
-           accuracyModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'pctcorr_neutral ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
-           reactionTimeModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'rtmdn_neutralcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
+            %figure, histogram(allControlEnergies_emotionid_currentContrast.pctcorr_neutral); title('emotionid - pctcorr_neutral');
+            %figure, histogram(allControlEnergies_emotionid_currentContrast.rtmdn_neutralcorr); title('emotionid - rtmdn_neutralcorr');
+            accuracyModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'pctcorr_neutral ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML')
+            reactionTimeModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'rtmdn_neutralcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
     end
     
     save(strcat(resultsDir, 'accuracyModel_emotionid_', currentContrast, '.mat'), 'accuracyModel_emotionid_currentContrast');
@@ -466,20 +475,20 @@ for i = 1:nContrasts
     
     switch currentContrast
         case 'contrast1_threatcorrectStd'
-            figure, histogram(allControlEnergies_emotionrec_currentContrast.pctcorr_threat); title('emotionrec - pctcorr_threat');
-            figure, histogram(allControlEnergies_emotionrec_currentContrast.rtmdn_threatcorr); title('emotionrec - rtmdn_threatcorr');
-            accuracyModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'pctcorr_threat ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
-            reactionTimeModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'rtmdn_threatcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
+            %figure, histogram(allControlEnergies_emotionrec_currentContrast.pctcorr_threat); title('emotionrec - pctcorr_threat');
+            %figure, histogram(allControlEnergies_emotionrec_currentContrast.rtmdn_threatcorr); title('emotionrec - rtmdn_threatcorr');
+            accuracyModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'pctcorr_threat ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML')
+            reactionTimeModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'rtmdn_threatcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML')
         case 'contrast3_nonthreatcorrectStd'
-            figure, histogram(allControlEnergies_emotionrec_currentContrast.pctcorr_nonthreat); title('emotionrec - pctcorr_nonthreat');
-            figure, histogram(allControlEnergies_emotionrec_currentContrast.rtmdn_nonthreatcorr); title('emotionrec - rtmdn_nonthreatcorr');
-            accuracyModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'pctcorr_nonthreat ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
-            reactionTimeModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'rtmdn_nonthreatcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
+            %figure, histogram(allControlEnergies_emotionrec_currentContrast.pctcorr_nonthreat); title('emotionrec - pctcorr_nonthreat');
+            %figure, histogram(allControlEnergies_emotionrec_currentContrast.rtmdn_nonthreatcorr); title('emotionrec - rtmdn_nonthreatcorr');
+            accuracyModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'pctcorr_nonthreat ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML')
+            reactionTimeModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'rtmdn_nonthreatcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML')
         case 'contrast5_neutralcorrectStd'
-           figure, histogram(allControlEnergies_emotionrec_currentContrast.pctcorr_neutral); title('emotionrec - pctcorr_neutral');
-            figure, histogram(allControlEnergies_emotionrec_currentContrast.rtmdn_neutralcorr); title('emotionrec - rtmdn_neutralcorr');
-           accuracyModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'pctcorr_neutral ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
-           reactionTimeModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'rtmdn_neutralcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML');
+            %figure, histogram(allControlEnergies_emotionrec_currentContrast.pctcorr_neutral); title('emotionrec - pctcorr_neutral');
+            %figure, histogram(allControlEnergies_emotionrec_currentContrast.rtmdn_neutralcorr); title('emotionrec - rtmdn_neutralcorr');
+            accuracyModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'pctcorr_neutral ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML')
+            reactionTimeModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'rtmdn_neutralcorr ~ persistence_allNodes + drug + group + gender + age + (1|subjectID)', 'FitMethod', 'REML')
     end
     
     save(strcat(resultsDir, 'accuracyModel_emotionrec_', currentContrast, '.mat'), 'accuracyModel_emotionrec_currentContrast');
@@ -590,7 +599,7 @@ for c = 1:nContrasts
     end
     
     controlInputDiff_emotionid_currentContrast_drug = abs(controlInputs_emotionid_allSubjects(drug==0, :) - controlInputs_emotionid_allSubjects(drug==1, :)); % calculating absolute value of difference in control input w/ and w/o drug
-        
+    
     % compute correlations between control impact differences w/ and w/o drug against PET
     % maps
     controlInputDiff_emotionid_currentContrast_drug_PETatlasCorrs = [corr(controlInputDiff_emotionid_currentContrast_drug', PET_5HT1a_WAY_HC36, 'Type', 'Spearman', 'Rows', 'Complete'), ...
@@ -604,8 +613,10 @@ for c = 1:nContrasts
         corr(controlInputDiff_emotionid_currentContrast_drug', PET_NAT_MRB_c11, 'Type', 'Spearman', 'Rows', 'Complete'), ...
         corr(controlInputDiff_emotionid_currentContrast_drug', PET_SERT_DASB_HC30, 'Type', 'Spearman', 'Rows', 'Complete')];
     
-    %controlInputDiff_emotionid_currentContrast_drug_PETatlasCorrs = atanh(controlInputDiff_emotionid_currentContrast_drug_PETatlasCorrs); % Fisher z-transform
-    [h, pValues] = ttest(controlInputDiff_emotionid_currentContrast_drug_PETatlasCorrs); % using one-sample t-test to check for significance of subject-wise correlations
+    controlInputDiff_emotionid_currentContrast_drug_PETatlasCorrs = atanh(controlInputDiff_emotionid_currentContrast_drug_PETatlasCorrs); % Fisher z-transform
+    %[h, pValues] = ttest(controlInputDiff_emotionid_currentContrast_drug_PETatlasCorrs); % using one-sample t-test to check for significance of subject-wise correlations
+    [pValues, ~, ~, ~, ~] = mult_comp_perm_t1(controlInputDiff_emotionid_currentContrast_drug_PETatlasCorrs);
+    h = double((pValues < 0.05));
     
     f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
     set(gca, 'FontSize', 20);
@@ -645,7 +656,7 @@ for c = 1:nContrasts
     end
     
     controlInputDiff_emotionrec_currentContrast_drug = abs(controlInput_emotionrec_allSubjects(drug==0, :) - controlInput_emotionrec_allSubjects(drug==1, :));
-        
+    
     % compute correlations between control impact differences w/ and w/o drug against PET
     % maps
     controlInputDiff_emotionrec_currentContrast_drug_PETatlasCorrs = [corr(controlInputDiff_emotionrec_currentContrast_drug', PET_5HT1a_WAY_HC36, 'Type', 'Spearman', 'Rows', 'Complete'), ...
@@ -660,7 +671,9 @@ for c = 1:nContrasts
         corr(controlInputDiff_emotionrec_currentContrast_drug', PET_SERT_DASB_HC30, 'Type', 'Spearman', 'Rows', 'Complete')];
     
     controlInputDiff_emotionrec_currentContrast_drug_PETatlasCorrs = atanh(controlInputDiff_emotionrec_currentContrast_drug_PETatlasCorrs); % Fisher z-transform
-    [h, pValues] = ttest(controlInputDiff_emotionrec_currentContrast_drug_PETatlasCorrs); % using one-sample t-test to check for significance of subject-wise correlations
+    %[h, pValues] = ttest(controlInputDiff_emotionrec_currentContrast_drug_PETatlasCorrs); % using one-sample t-test to check for significance of subject-wise correlations
+    [pValues, ~, ~, ~, ~]=mult_comp_perm_t1(controlInputDiff_emotionid_currentContrast_drug_PETatlasCorrs);
+    h = double(pValues < 0.05);
     
     f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
     set(gca, 'FontSize', 20);
@@ -709,7 +722,7 @@ for c = 1:nContrasts
             continue;
         else
             allControlTrajectories_currentNode = addvars(allControlTrajectories_emotionid_currentContrast, controlInput_currentNode); % creating table with additional variable
-            controlInputModel = fitlme(allControlTrajectories_currentNode, 'controlInput_currentNode ~ drug + group + drug*group + (1|subjectID)', 'FitMethod', 'REML'); % fitting mixed model
+            controlInputModel = fitlme(allControlTrajectories_currentNode, 'controlInput_currentNode ~ drug + group + drug*group + (1|subjectID)', 'FitMethod', 'ML'); % fitting mixed model
             coefficientNames = controlInputModel.CoefficientNames; coefficients = controlInputModel.Coefficients.Estimate; pValues = controlInputModel.Coefficients.pValue; % extracting coefficients and p-values
             betas_groupMain(i) = coefficients(strcmp(coefficientNames, 'group')); betas_drugMain(i) = coefficients(strcmp(coefficientNames, 'drug')); betas_groupDrugInteraction(i) = coefficients(strcmp(coefficientNames, 'group:drug'));
             pValues_groupMain(i) = pValues(strcmp(coefficientNames, 'group')); pValues_drugMain(i) = pValues(strcmp(coefficientNames, 'drug')); pValues_groupDrugInteraction(i) = pValues(strcmp(coefficientNames, 'group:drug'));
@@ -718,26 +731,29 @@ for c = 1:nContrasts
     
     betas_groupMain = abs(betas_groupMain); betas_drugMain = abs(betas_drugMain); betas_groupDrugInteraction = abs(betas_groupDrugInteraction); % taking absolute values of coefficients
     
-    pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true); 
-    pValues_drugMain_FDR = mafdr(pValues_drugMain, 'BHFDR', true);
-    pValues_groupDrugInteraction_FDR = mafdr(pValues_groupDrugInteraction, 'BHFDR', true);
+    % indices of coefficients that are significant (p<0.05)
+    significant_idx_groupMain = (pValues_groupMain<0.05); significant_idx_drugMain = (pValues_drugMain<0.05); significant_idx_groupDrugInteraction = (pValues_groupDrugInteraction<0.05);
     
-    sum(pValues_groupMain_FDR < 0.05/234)
-    sum(pValues_drugMain_FDR < 0.05/234)
-    sum(pValues_groupDrugInteraction_FDR < 0.05/234)
+%     pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true);
+%     pValues_drugMain_FDR = mafdr(pValues_drugMain, 'BHFDR', true);
+%     pValues_groupDrugInteraction_FDR = mafdr(pValues_groupDrugInteraction, 'BHFDR', true);
+    
+%     sum(pValues_groupMain < 0.05/(sum(~isnan(pValues_groupMain))))
+%     sum(pValues_drugMain < 0.05/(sum(~isnan(pValues_drugMain))))
+%     sum(pValues_groupDrugInteraction < 0.05/(sum(~isnan(pValues_groupDrugInteraction))))
     
     % plotting coefficients of group main effect versus PET
     % neurotransmitter profiles
     f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
     set(gca, 'FontSize', 20);
-
+    
     xlim([0, 1]);
     ylim([10, 80]);
     
     plot(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
     [rho, pVal_corr] = corr(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
     text(0.1, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
-        
+    
     lsline;
     xlabel('coefficients of group main effect');
     ylabel('GABA receptor density');
@@ -808,7 +824,7 @@ for c = 1:nContrasts
             continue;
         else
             allControlTrajectories_currentNode = addvars(allControlTrajectories_emotionrec_currentContrast, controlInput_currentNode); % creating table with additional variable
-            controlInputModel = fitlme(allControlTrajectories_currentNode, 'controlInput_currentNode ~ drug + group + drug*group + (1|subjectID)', 'FitMethod', 'REML'); % fitting mixed model
+            controlInputModel = fitlme(allControlTrajectories_currentNode, 'controlInput_currentNode ~ drug + group + drug*group + (1|subjectID)', 'FitMethod', 'ML'); % fitting mixed model
             coefficientNames = controlInputModel.CoefficientNames; coefficients = controlInputModel.Coefficients.Estimate; pValues = controlInputModel.Coefficients.pValue; % extracting coefficients and p-values
             betas_groupMain(i) = coefficients(strcmp(coefficientNames, 'group')); betas_drugMain(i) = coefficients(strcmp(coefficientNames, 'drug')); betas_groupDrugInteraction(i) = coefficients(strcmp(coefficientNames, 'group:drug'));
             pValues_groupMain(i) = pValues(strcmp(coefficientNames, 'group')); pValues_drugMain(i) = pValues(strcmp(coefficientNames, 'drug')); pValues_groupDrugInteraction(i) = pValues(strcmp(coefficientNames, 'group:drug'));
@@ -817,7 +833,7 @@ for c = 1:nContrasts
     
     betas_groupMain = abs(betas_groupMain); betas_drugMain = abs(betas_drugMain); betas_groupDrugInteraction = abs(betas_groupDrugInteraction); % taking absolute values of coefficients
     
-    pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true); 
+    pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true);
     pValues_drugMain_FDR = mafdr(pValues_drugMain, 'BHFDR', true);
     pValues_groupDrugInteraction_FDR = mafdr(pValues_groupDrugInteraction, 'BHFDR', true);
     
@@ -829,14 +845,14 @@ for c = 1:nContrasts
     % neurotransmitter profiles
     f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
     set(gca, 'FontSize', 20);
-
+    
     xlim([0, 1]);
     ylim([10, 80]);
     
     plot(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
     [rho, pVal_corr] = corr(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
     text(0.1, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
-        
+    
     lsline;
     xlabel('coefficients of group main effect');
     ylabel('GABA receptor density');
@@ -893,10 +909,10 @@ GABRG2 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRG2'));
 % % associated subunit expression
 % GABAA_type1 = min([GABRA1, GABRB1, GABRB2, GABRB3, GABRG2], [], 2); %GABAA_type1(idx_brainstem) = [];
 % GABAA_type2 = min([GABRA2, GABRA3, GABRA5, GABRB1, GABRB2, GABRB3, GABRG2], [], 2); %GABAA_type2(idx_brainstem) = [];
-% 
+%
 % %GABAA_type1(GABAA_type1 < prctile(GABAA_type1, 80) | isnan(GABAA_type1)) = 0; % keeping only top 20th percentile and non-NaN values
 % %GABAA_type2(GABAA_type1 < prctile(GABAA_type2, 80) | isnan(GABAA_type2)) = 0; % keeping only top 20th percentile and non-NaN values
-% 
+%
 % [f, ax, ph, ~] = fcn_lausannesurf(GABAA_type1, hot, [0 0.58]); close(f(2)); % plotting only right hemisphere
 % view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 % axis(ax(1), 'off'); colorbar;
@@ -906,7 +922,7 @@ GABRG2 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRG2'));
 % figure;
 % [f_ant,f_lat] = plot_subcortvol(GABAA_type1(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 0.58); % visualizing sub-cortical areas
 % close(f_lat); colorbar;
-% 
+%
 % [f, ax, ph, ~] = fcn_lausannesurf(GABAA_type2, hot, [0 0.58]); close(f(2)); % plotting only right hemisphere
 % view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 % axis(ax(1), 'off'); colorbar;
@@ -955,7 +971,7 @@ for c = 1:nContrasts
         end
     end
     
-    pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true); 
+    pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true);
     pValues_drugMain_FDR = mafdr(pValues_drugMain, 'BHFDR', true);
     pValues_groupDrugInteraction_FDR = mafdr(pValues_groupDrugInteraction, 'BHFDR', true);
     
@@ -1082,7 +1098,7 @@ for c = 1:nContrasts
         end
     end
     
-    pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true); 
+    pValues_groupMain_FDR = mafdr(pValues_groupMain, 'BHFDR', true);
     pValues_drugMain_FDR = mafdr(pValues_drugMain, 'BHFDR', true);
     pValues_groupDrugInteraction_FDR = mafdr(pValues_groupDrugInteraction, 'BHFDR', true);
     

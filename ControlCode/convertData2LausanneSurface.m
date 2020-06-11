@@ -33,7 +33,7 @@ for i = 1:size(data, 1)
         if ~isempty(currentLabel)
             rh_surf_LausanneParcelIDs(RL == currentLabel) = i;
         else
-            fprintf('parcel %s not found in rh surface annotation\n', currentParcelName);
+            %fprintf('parcel %s not found in rh surface annotation\n', currentParcelName);
         end
     % left hemisphere
     else
@@ -41,7 +41,7 @@ for i = 1:size(data, 1)
         if ~isempty(currentLabel)
             lh_surf_LausanneParcelIDs(LL == currentLabel) = i;
         else
-            fprintf('parcel %s not found in lh surface annotation\n', currentParcelName);
+            %fprintf('parcel %s not found in lh surface annotation\n', currentParcelName);
         end
     end
 end
