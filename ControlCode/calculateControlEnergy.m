@@ -15,6 +15,7 @@ parcelCoverageThresh = [0.5]; % threshold for keeping a parcel based on coverage
 structuralEdges = {'QA'};
 controlInputs = {'allNodes'};
 
+nIterations_spinTest = 500;
 nIterations_nullModel = 1; % number of iterations of structural null models
 
 %% iterating through parameter choices
@@ -194,7 +195,7 @@ for n = 1:numel(normalizationMethods)
                                                             xf = x(parcelsToInclude); % using beta values from first-level GLM as brain states
                                                         case 'spinTest'
                                                             scrambled_xf_savePath = strcat('spinTestResults', filesep, currentSubjectID_str, '_', currentSessionID_str, '_', currentTaskID, '_', currentContrastLabel, '_', atlasLabel);
-                                                            xf = calculateScrambledBetas(x, scrambled_xf_savePath, nIterations); % using scrambled activation patterns calculated using spin-test
+                                                            xf = calculateScrambledBetas(x, scrambled_xf_savePath, nIterations_spinTest); % using scrambled activation patterns calculated using spin-test
                                                     end
                                                     
                                                     switch currentNormalizationMethod
