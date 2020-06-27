@@ -7,16 +7,16 @@ clear all;
 
 addpath(genpath('~/matlab/BCT'));
 
-brainStates = {'spinTest'};
+brainStates = {'betas'};
 normalizationMethods = {'EuclideanNorm'};
 controlAlgorithm = 'minimalControl';
 avge_FD_thresh = [0.5]; % threshold for eliminating subjects based on motion (in mm)
 parcelCoverageThresh = [0.5]; % threshold for keeping a parcel based on coverage in subject mask
-structuralEdges = {'QA'};
+structuralEdges = {'nullModel2'};
 controlInputs = {'allNodes'};
 
 nIterations_spinTest = 500;
-nIterations_nullModel = 1; % number of iterations of structural null models
+nIterations_nullModel2 = 500; % number of iterations of structural null models
 
 %% iterating through parameter choices
 for n = 1:numel(normalizationMethods)
@@ -31,7 +31,7 @@ for n = 1:numel(normalizationMethods)
                     currentStructuralEdges = structuralEdges{se};
                     for c = 1:numel(controlInputs)
                         currentControlInputs = controlInputs{c};
-%                        for iter_nullModel2 = 1:nIterations_nullModel
+                        for iter_nullModel2 = 1:nIterations_nullModel2
                             switch currentStructuralEdges
                                 case 'StreamlineCounts'
                                     A = getAverageStreamlineCounts(); % calculating average streamline counts from Q7 data
@@ -214,7 +214,7 @@ for n = 1:numel(normalizationMethods)
                                                 % [nNodes x nPermutations]
                                                 % matrix
                                                 if size(xf, 2) > 1
-                                                    for iter_spinTest = 1:nIterations
+                                                    for iter_spinTest = 1:nIterations_spinTest
                                                         current_xf = xf(:, iter_spinTest);
                                                         current_xf = current_xf(parcelsToInclude);
                                                         S = eye(numel(current_xf), numel(current_xf));
@@ -246,6 +246,7 @@ for n = 1:numel(normalizationMethods)
                                                         persistence_subcortex(iter_spinTest) = sum(energyCost_persistence(finalLabels_slab==8));
                                                         % setting initial state to 0's
                                                         %x0 = zeros(size(xf));
+                                                        controlImpact_currentSubject = zeros(1, nNodes_currentSubject);
                                                     end
                                                 else
                                                     
@@ -381,18 +382,18 @@ for n = 1:numel(normalizationMethods)
                                 end
                             end
                             
-%                             writetable(allControlEnergies_emotionid, strcat(resultsDir, 'allControlEnergies_emotionid_iteration', num2str(iter_nullModel2), '.csv'));
-%                             writetable(allControlEnergies_emotionrec, strcat(resultsDir, 'allControlEnergies_emotionrec_iteration', num2str(iter_nullModel2), '.csv'));
+                            writetable(allControlEnergies_emotionid, strcat(resultsDir, 'allControlEnergies_emotionid_iteration', num2str(iter_nullModel2), '.csv'));
+                            writetable(allControlEnergies_emotionrec, strcat(resultsDir, 'allControlEnergies_emotionrec_iteration', num2str(iter_nullModel2), '.csv'));
                             
-                            writetable(allControlEnergies_emotionid, strcat(resultsDir, 'allControlEnergies_emotionid.csv'));
-                            writetable(allControlEnergies_emotionrec, strcat(resultsDir, 'allControlEnergies_emotionrec.csv'));
+%                             writetable(allControlEnergies_emotionid, strcat(resultsDir, 'allControlEnergies_emotionid.csv'));
+%                             writetable(allControlEnergies_emotionrec, strcat(resultsDir, 'allControlEnergies_emotionrec.csv'));
                             
                             createContrastFiles(resultsDir);
                             
                             %                            save(strcat(resultsDir, 'allControlTrajectories_emotionid_iteration', num2str(iter), '.mat'), 'allControlTrajectories_emotionid');
                             %                            save(strcat(resultsDir, 'allControlTrajectories_emotionrec_iteration', num2str(iter), '.mat'), 'allControlTrajectories_emotionrec');
                             save(strcat(resultsDir, 'structuralAdjacencyMatrix_iteration', num2str(iter_nullModel2), '.mat'), 'A');
-                        %end
+                        end
                     end
                 end
             end

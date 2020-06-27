@@ -7,7 +7,7 @@ addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/LausanneSurfaceFigures'))
 addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/LausanneCoordinates'));
 addpath(genpath('/Users/ArunMahadevan/Documents/MATLAB/mult_comp_perm_t1'));
 
-resultsDir = 'Results/minimalControl/avge_FD_thresh_0.5_parcelCoverageThresh_0.5_none_allNodes_QA_betas/';
+resultsDir = 'Results/minimalControl/avge_FD_thresh_0.5_parcelCoverageThresh_0.5_EuclideanNorm_allNodes_QA_betas/';
 
 allControlEnergies_emotionid = readtable(strcat(resultsDir, 'allControlEnergies_emotionid.csv'));
 allControlEnergies_emotionrec = readtable(strcat(resultsDir, 'allControlEnergies_emotionrec.csv'));
@@ -42,19 +42,25 @@ fprintf('percent female controls = %.1f\n', 100*sum(subjectDemographics.sex_M0F1
 fprintf('proportion female controls: %iF/%iM\n', sum(subjectDemographics.sex_M0F1(group==0)), sum(group==0)-sum(subjectDemographics.sex_M0F1(group==0)))
 fprintf('percent female relatives = %.1f\n', 100*sum(subjectDemographics.sex_M0F1(group==1)/sum(group==1)))
 fprintf('proportion female controls: %iF/%iM\n', sum(subjectDemographics.sex_M0F1(group==1)), sum(group==1)-sum(subjectDemographics.sex_M0F1(group==1)))
-[~, pValue] = ttest2(subjectDemographics.sex_M0F1(group==0), subjectDemographics.sex_M0F1(group==1)) % need to implement different statistical test
+x = table([sum(subjectDemographics.sex_M0F1(group==0)) sum(subjectDemographics.sex_M0F1(group==1)); ...
+     sum(group==0)-sum(subjectDemographics.sex_M0F1(group==0)) sum(group==1)-sum(subjectDemographics.sex_M0F1(group==1))]);
+[~, pValue] = fishertest(x)
 
 fprintf('percent right-handed = %.1f\n', 100-(100*sum(subjectDemographics.hand_R0L1(group==0)/sum(group==0))))
 fprintf('proportion right-handed: %iR/%iL\n', sum(group==0)-sum(subjectDemographics.hand_R0L1(group==0)), sum(subjectDemographics.hand_R0L1(group==0)))
 fprintf('percent right-handed = %.1f\n', 100-(100*sum(subjectDemographics.hand_R0L1(group==1)/sum(group==1))))
 fprintf('proportion right-handed: %iR/%iL\n', sum(group==1)-sum(subjectDemographics.hand_R0L1(group==1)), sum(subjectDemographics.hand_R0L1(group==1)))
-[~, pValue] = ttest2(subjectDemographics.hand_R0L1(group==0), subjectDemographics.hand_R0L1(group==1))
+x = table([sum(subjectDemographics.hand_R0L1(group==0)) sum(subjectDemographics.hand_R0L1(group==1)); ...
+     sum(group==0)-sum(subjectDemographics.hand_R0L1(group==0)) sum(group==1)-sum(subjectDemographics.hand_R0L1(group==1))]);
+[~, pValue] = fishertest(x)
 
 fprintf('percent non-smokers = %.1f\n', 100*sum(subjectDemographics.smoke_Y0N1(group==0)/sum(group==0)))
 fprintf('proportion smoke: %iN/%iY\n', sum(subjectDemographics.smoke_Y0N1(group==0)), sum(group==0)-sum(subjectDemographics.smoke_Y0N1(group==0)))
 fprintf('percent non-smokers = %.1f\n', 100*sum(subjectDemographics.smoke_Y0N1(group==1)/sum(group==1)))
 fprintf('proportion smoke: %iN/%iY\n', sum(subjectDemographics.smoke_Y0N1(group==1)), sum(group==1)-sum(subjectDemographics.smoke_Y0N1(group==1)))
-[~, pValue] = ttest2(subjectDemographics.smoke_Y0N1(group==0), subjectDemographics.smoke_Y0N1(group==1))
+x = table([sum(subjectDemographics.smoke_Y0N1(group==0)) sum(subjectDemographics.smoke_Y0N1(group==1)); ...
+     sum(group==0)-sum(subjectDemographics.smoke_Y0N1(group==0)) sum(group==1)-sum(subjectDemographics.smoke_Y0N1(group==1))]);
+[~, pValue] = fishertest(x)
 
 fprintf('mean age (std) = %.1f(%.1f)\n', mean(subjectDemographics.AgeAtFMRI(group==0)), std(subjectDemographics.AgeAtFMRI(group==0)))
 fprintf('range: %.1f-%.1f\n', min(subjectDemographics.AgeAtFMRI(group==0)), max(subjectDemographics.AgeAtFMRI(group==0)))
@@ -98,6 +104,29 @@ fprintf('mean SISTOTAL (std) = %.1f(%.1f)\n', mean(subjectDemographics.SISTOTAL(
 fprintf('range: %.1f-%.1f\n', min(subjectDemographics.SISTOTAL(group==1)), max(subjectDemographics.SISTOTAL(group==1)))
 [~, pValue] = ttest2(subjectDemographics.SISTOTAL(group==0), subjectDemographics.SISTOTAL(group==1))
 
+% using different table for STAI_TRAIT and alpraz_levels
+allSubjectInfo_emotionID = readtable('../../Alpraz_emotionid.xlsx');
+subjectIDs = subjectDemographics.bblid;
+
+STAI_TRAIT = zeros(numel(subjectIDs), 1);
+for i = 1:numel(subjectIDs)
+    currentSubjectID = subjectIDs(i)
+    STAI_TRAIT(i) = mean(allSubjectInfo_emotionID.STAI_TRAIT(allSubjectInfo_emotionID.bblid == currentSubjectID)); % averaging anxiety values over sessions
+end
+fprintf('mean STAI_TRAIT = %.1f(%.1f)\n', mean(STAI_TRAIT(group==0)), std(STAI_TRAIT(group==0)))
+fprintf('range: %.1f-%.1f\n', min(STAI_TRAIT(group==0)), max(STAI_TRAIT(group==0)))
+fprintf('mean STAI_TRAIT (std) = %.1f(%.1f)\n', mean(STAI_TRAIT(group==1)), std(STAI_TRAIT(group==1)))
+fprintf('range: %.1f-%.1f\n', min(STAI_TRAIT(group==1)), max(STAI_TRAIT(group==1)))
+pValue = ranksum(STAI_TRAIT(group==0), STAI_TRAIT(group==1))
+
+drug = allSubjectInfo_emotionID.drug;
+alpraz_levels = allSubjectInfo_emotionID.alpraz_levels(drug == 0); % using alpraz_levels in session where drug was administered
+fprintf('mean alpraz_levels = %.1f(%.1f)\n', mean(alpraz_levels(group==0), 'omitnan'), std(alpraz_levels(group==0), 'omitnan'))
+fprintf('range: %.1f-%.1f\n', min(alpraz_levels(group==0)), max(alpraz_levels(group==0)))
+fprintf('mean alpraz_levels (std) = %.1f(%.1f)\n', mean(alpraz_levels(group==1), 'omitnan'), std(alpraz_levels(group==1), 'omitnan'))
+fprintf('range: %.1f-%.1f\n', min(alpraz_levels(group==1)), max(alpraz_levels(group==1)))
+[~, pValue] = ttest2(alpraz_levels(group==0), alpraz_levels(group==1))
+
 %% Figure 1
 
 %% plot structural matrix
@@ -125,12 +154,12 @@ axis(ax(1), 'off'); axis(ax(2), 'off');
 
 %% plot brain activation maps w/ and w/o alpraz for individual subject
 
-brainStates_alpraz = nan(234, 1);
-xf = allControlTrajectories_emotionid.xf{1};
+brainStates_alpraz = zeros(234, 1);
+xf = allControlTrajectories_emotionid.xf{2};
 parcelsToInclude_idx = allControlTrajectories_emotionid.parcelsToInclude_idx{1};
 brainStates_alpraz(parcelsToInclude_idx) = xf;
 
-[~, ax, ph, ~] = fcn_lausannesurf(brainStates_alpraz, hot);
+[~, ax, ph, ~] = fcn_lausannesurf(brainStates_alpraz, redbluecmap);
 view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');
@@ -160,14 +189,86 @@ for i = 1:nContrasts
     allControlEnergies_emotionid_currentContrast.gender = categorical(allControlEnergies_emotionid_currentContrast.gender);
     
     % fitting model after checking for normality
-    persistence_allNodes = allControlEnergies_emotionid_currentContrast.persistence_allNodes;
-    h = kstest(zscore(persistence_allNodes));
-    figure, histogram(persistence_allNodes); title(strcat('KS test: ', num2str(h)));
-    mixedModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'persistence_allNodes ~ drug + group + drug*group + STAI_TRAIT*drug + SISTOTAL + gender + age + (1|subjectID)', 'FitMethod', 'REML')
+    %persistence_allNodes = allControlEnergies_emotionid_currentContrast.persistence_allNodes;
+    %h = kstest(zscore(persistence_allNodes));
+    %figure, histogram(persistence_allNodes); title(strcat('KS test: ', num2str(h)));
+    mixedModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'persistence_allNodes ~ drug + group + drug*group + STAI_TRAIT*drug + SISTOTAL + gender + age + (1|subjectID)', 'FitMethod', 'REML');
     save(strcat(resultsDir, 'mixedModel_emotionid_', currentContrast, '.mat'), 'mixedModel_emotionid_currentContrast');
 end
 
 %% creating mixed models to examine effects of clinical and demographic variables on persistence_allNodes during emotionrec
+
+contrast = allControlEnergies_emotionrec.contrast;
+
+for i = 1:nContrasts
+    currentContrast = contrastLabels{i};
+    allControlEnergies_emotionrec_currentContrast = allControlEnergies_emotionrec(strcmp(contrast, currentContrast), :);
+    
+    % converting categorical variables
+    allControlEnergies_emotionrec_currentContrast.group = categorical(allControlEnergies_emotionrec_currentContrast.group);
+    allControlEnergies_emotionrec_currentContrast.drug = categorical(allControlEnergies_emotionrec_currentContrast.drug);
+    allControlEnergies_emotionrec_currentContrast.gender = categorical(allControlEnergies_emotionrec_currentContrast.gender);
+    
+    % fitting model
+    %persistence_allNodes = allControlEnergies_emotionrec_currentContrast.persistence_allNodes;
+    %h = kstest(zscore(persistence_allNodes));
+    %figure, histogram(persistence_allNodes); title(strcat('KS test: ', num2str(h)));
+    mixedModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'persistence_allNodes ~ drug + group + drug*group + STAI_TRAIT*drug + SISTOTAL + gender + age + (1|subjectID)', 'FitMethod', 'REML');
+    save(strcat(resultsDir, 'mixedModel_emotionrec_', currentContrast, '.mat'), 'mixedModel_emotionrec_currentContrast');
+end
+
+%% comparing test statistics from mixed model against null models - emotionid
+
+nIterations = 500;
+contrast = allControlEnergies_emotionid.contrast;
+
+% loading results of null model
+resultsDir_nullModel = 'Results/minimalControl/avge_FD_thresh_0.5_parcelCoverageThresh_0.5_EuclideanNorm_allNodes_QA_spinTest/';
+allControlEnergies_emotionid_nullModel = readtable(strcat(resultsDir_nullModel, 'allControlEnergies_emotionid.csv'));
+
+for i = 1:nContrasts
+    currentContrast = contrastLabels{i};
+    allControlEnergies_emotionid_currentContrast = allControlEnergies_emotionid(strcmp(contrast, currentContrast), :);
+    
+    % converting categorical variables
+    allControlEnergies_emotionid_currentContrast.group = categorical(allControlEnergies_emotionid_currentContrast.group);
+    allControlEnergies_emotionid_currentContrast.drug = categorical(allControlEnergies_emotionid_currentContrast.drug);
+    allControlEnergies_emotionid_currentContrast.gender = categorical(allControlEnergies_emotionid_currentContrast.gender);
+    
+    % fitting model after checking for normality
+    %persistence_allNodes = allControlEnergies_emotionid_currentContrast.persistence_allNodes;
+    %h = kstest(zscore(persistence_allNodes));
+    %figure, histogram(persistence_allNodes); title(strcat('KS test: ', num2str(h)));
+    mixedModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'persistence_allNodes ~ drug + group + drug*group + STAI_TRAIT*drug + SISTOTAL + gender + age + (1|subjectID)', 'FitMethod', 'REML');
+    [beta, betanames, stats] = fixedEffects(mixedModel_emotionid_currentContrast);
+    tStats_emotionid_currentContrast = stats.tStat;
+    
+    tStats_emotionid_nullModel_currentContrast = zeros(numel(tStats_emotionid_currentContrast), nIterations);
+    pValues_emotionid_nullModel_currentContrast = zeros(numel(tStats_emotionid_currentContrast), 1);
+    for j = 1:nIterations
+        fprintf('iteration %d\n', j);
+        allControlEnergies_emotionid_nullModel_currentContrast = allControlEnergies_emotionid_nullModel(strcmp(contrast, currentContrast), :);
+        
+        % converting categorical variables
+        allControlEnergies_emotionid_nullModel_currentContrast.group = categorical(allControlEnergies_emotionid_nullModel_currentContrast.group);
+        allControlEnergies_emotionid_nullModel_currentContrast.drug = categorical(allControlEnergies_emotionid_nullModel_currentContrast.drug);
+        allControlEnergies_emotionid_nullModel_currentContrast.gender = categorical(allControlEnergies_emotionid_nullModel_currentContrast.gender);
+        
+        currentModelFormula = strcat('persistence_allNodes_', num2str(j), ' ~ drug + group + drug*group + STAI_TRAIT*drug + SISTOTAL + gender + age + (1|subjectID)');
+        mixedModel_emotionid_nullModel_currentContrast = fitlme(allControlEnergies_emotionid_nullModel_currentContrast, currentModelFormula, 'FitMethod', 'REML');
+        [beta, betanames, stats] = fixedEffects(mixedModel_emotionid_nullModel_currentContrast);
+        tStats_emotionid_nullModel_currentContrast(:, j) = stats.tStat;
+    end
+    
+    for j = 1:numel(tStats_emotionid_currentContrast)
+        pValues_emotionid_nullModel_currentContrast(i) = sum(abs(tStats_emotionid_currentContrast(j)) > abs(tStats_emotionid_nullModel_currentContrast(j, :)))/nIterations;
+    end
+    
+    save(strcat(resultsDir, 'tStats_emotionid_nullModel_', currentContrast, '.mat'), 'tStats_emotionid_nullModel_currentContrast');
+    save(strcat(resultsDir, 'pValues_emotionid_nullModel_', currentContrast, '.mat'), 'pValues_emotionid_nullModel_currentContrast');
+end
+
+%% comparing test statistics from mixed model against null models - emotionrec
 
 contrast = allControlEnergies_emotionrec.contrast;
 
@@ -181,9 +282,9 @@ for i = 1:nContrasts
     allControlEnergies_emotionrec_currentContrast.gender = categorical(allControlEnergies_emotionrec_currentContrast.gender);
     
     % fitting model
-    persistence_allNodes = allControlEnergies_emotionrec_currentContrast.persistence_allNodes;
-    h = kstest(zscore(persistence_allNodes));
-    figure, histogram(persistence_allNodes); title(strcat('KS test: ', num2str(h)));
+    %persistence_allNodes = allControlEnergies_emotionrec_currentContrast.persistence_allNodes;
+    %h = kstest(zscore(persistence_allNodes));
+    %figure, histogram(persistence_allNodes); title(strcat('KS test: ', num2str(h)));
     mixedModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'persistence_allNodes ~ drug + group + drug*group + STAI_TRAIT*drug + SISTOTAL + gender + age + (1|subjectID)', 'FitMethod', 'REML')
     save(strcat(resultsDir, 'mixedModel_emotionrec_', currentContrast, '.mat'), 'mixedModel_emotionrec_currentContrast');
 end
@@ -334,18 +435,24 @@ emotionid_controlImpact_nodeNames = sortrows(emotionid_controlImpact_nodeNames, 
 emotionid_controlImpact_nodeNames = cell2table(emotionid_controlImpact_nodeNames, 'VariableNames', {'controlImpact_sorted', 'nodeName_Lausanne'});
 writetable(emotionid_controlImpact_nodeNames, strcat(resultsDir, 'emotionid_controlImpact_nodeNames.csv'));
 
-[~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionid_allSubjects, hot, [0 1.5]);
+[f, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionid_allSubjects, redbluecmap, [0 1.5]);
 view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');
-figure; [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionid_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5);
-close(f_lat);
-[~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionid_allSubjects, hot, [0 1.5]);
+savePath = strcat(resultsDir, 'emotionid_controlImpactPlots_cortex1.svg'); saveas(f(1), savePath); close(f(1));
+savePath = strcat(resultsDir, 'emotionid_controlImpactPlots_cortex2.svg'); saveas(f(2), savePath); close(f(2));
+
+[f, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionid_allSubjects, redbluecmap, [0 1.5]);
 view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');
-figure; [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionid_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5);
-close(f_lat);
+savePath = strcat(resultsDir, 'emotionid_controlImpactPlots_cortex3.svg'); saveas(f(1), savePath); close(f(1));
+savePath = strcat(resultsDir, 'emotionid_controlImpactPlots_cortex4.svg'); saveas(f(2), savePath); close(f(2));
+
+figure; [f1, f2] = plot_subcortvol(avgeControlImpact_emotionid_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, redbluecmap, 0, 1.5);
+savePath1 = strcat(resultsDir, 'emotionid_controlImpactPlots_subcortex1.svg'); saveas(f1, savePath1); 
+savePath2 = strcat(resultsDir, 'emotionid_controlImpactPlots_subcortex2.svg'); saveas(f2, savePath2); 
+close(f1); close(f2);
 
 %% emotionrec
 
@@ -385,30 +492,35 @@ emotionrec_controlImpact_nodeNames = sortrows(emotionrec_controlImpact_nodeNames
 emotionrec_controlImpact_nodeNames = cell2table(emotionrec_controlImpact_nodeNames, 'VariableNames', {'controlImpact_sorted', 'nodeName_Lausanne'});
 writetable(emotionrec_controlImpact_nodeNames, strcat(resultsDir, 'emotionrec_controlImpact_nodeNames.csv'));
 
-[~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionrec_allSubjects, hot, [0 1.5]);
+[f, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionrec_allSubjects, redbluecmap, [0 1.5]);
 view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');
-figure; [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionrec_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5);
-close(f_lat);
-[~, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionrec_allSubjects, hot, [0 1.5]);
+savePath = strcat(resultsDir, 'emotionrec_controlImpactPlots_cortex1.svg'); saveas(f(1), savePath); close(f(1));
+savePath = strcat(resultsDir, 'emotionrec_controlImpactPlots_cortex2.svg'); saveas(f(2), savePath); close(f(2));
+
+[f, ax, ph, ~] = fcn_lausannesurf(avgeControlImpact_emotionrec_allSubjects, redbluecmap, [0 1.5]);
 view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');
-figure; [~,f_lat] = plot_subcortvol(avgeControlImpact_emotionrec_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 0, 1.5);
-close(f_lat);
+savePath = strcat(resultsDir, 'emotionrec_controlImpactPlots_cortex3.svg'); saveas(f(1), savePath); close(f(1));
+savePath = strcat(resultsDir, 'emotionrec_controlImpactPlots_cortex4.svg'); saveas(f(2), savePath); close(f(2));
+
+figure; [f1, f2] = plot_subcortvol(avgeControlImpact_emotionrec_allSubjects(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, redbluecmap, 0, 1.5);
+savePath1 = strcat(resultsDir, 'emotionrec_controlImpactPlots_subcortex1.svg'); saveas(f1, savePath1); 
+savePath2 = strcat(resultsDir, 'emotionrec_controlImpactPlots_subcortex2.svg'); saveas(f2, savePath2); 
+close(f1); close(f2);
 
 %% Figure 3
 
-%% plotting SISTOTAL and STAI_TRAIT against persistence_allNodes for nonthreat emotionid
+%% plotting SISTOTAL against persistence_allNodes for nonthreat emotionid
 
 contrast = allControlEnergies_emotionid.contrast;
 allControlEnergies_emotionid_nonthreat = allControlEnergies_emotionid(strcmp(contrast, 'contrast3_nonthreatcorrectStd'), :);
+age = allControlEnergies_emotionid_nonthreat.age;
+gender = allControlEnergies_emotionid_nonthreat.gender;
 persistence_allNodes_nonthreat = allControlEnergies_emotionid_nonthreat.persistence_allNodes;
-allControlEnergies_emotionid_neutral = allControlEnergies_emotionid(strcmp(contrast, 'contrast5_neutralcorrectStd'), :);
-persistence_allNodes_neutral = allControlEnergies_emotionid_neutral.persistence_allNodes;
 SISTOTAL = allControlEnergies_emotionid_nonthreat.SISTOTAL;
-STAI_TRAIT = allControlEnergies_emotionid_nonthreat.STAI_TRAIT;
 
 figure; set(gcf, 'color', 'white');
 plot(SISTOTAL, persistence_allNodes_nonthreat, 'k.', 'MarkerSize', 20);
@@ -416,21 +528,35 @@ h = lsline; h.LineWidth = 2;
 xlabel('SISTOTAL');
 ylabel('persistence energy - nonthreat');
 set(gca, 'FontSize', 20);
-[rho, pValue] = corr(SISTOTAL, persistence_allNodes_nonthreat, 'Rows', 'Complete')
+[rho, pValue] = partialcorr(SISTOTAL, persistence_allNodes_nonthreat, [age gender], 'Rows', 'Complete');
+text(30, 0.25, strcat('\rho=', num2str(rho, 2)), 'FontSize', 14);
+text(30, 0.225, strcat('p=', num2str(pValue, 2)), 'FontSize', 14);
 ylim([0.2, 0.65]);
+grid off;
 
-drug = allControlEnergies_emotionid_nonthreat.drug;
+%% plotting STAI_TRAIT against persistence_allNodes for neutral emotionid
+
+allControlEnergies_emotionid_neutral = allControlEnergies_emotionid(strcmp(contrast, 'contrast5_neutralcorrectStd'), :);
+persistence_allNodes_neutral = allControlEnergies_emotionid_neutral.persistence_allNodes;
+age = allControlEnergies_emotionid_neutral.age;
+gender = allControlEnergies_emotionid_neutral.gender;
+drug = allControlEnergies_emotionid_neutral.drug;
+STAI_TRAIT = allControlEnergies_emotionid_neutral.STAI_TRAIT;
 
 figure; set(gcf, 'color', 'w'); set(gca, 'FontSize', 20); hold on;
-plot(STAI_TRAIT(drug==1), persistence_allNodes_neutral(drug==1), 'r.', 'MarkerSize', 20);
-plot(STAI_TRAIT(drug==0), persistence_allNodes_neutral(drug==0), 'b.', 'MarkerSize', 20);
+plot(STAI_TRAIT(drug==1), persistence_allNodes_neutral(drug==0), 'b.', 'MarkerSize', 20);
+plot(STAI_TRAIT(drug==0), persistence_allNodes_neutral(drug==1), 'r.', 'MarkerSize', 20);
 lsline;
 h = lsline; h(1).LineWidth = 2; h(2).LineWidth = 2;
 xlabel('trait anxiety');
 ylabel('persistence energy - neutral');
-legend('placebo', 'alpraz', 'location', 'northeast'); legend boxoff;
-[rho, pValue] = corr(STAI_TRAIT(drug==0), persistence_allNodes_neutral(drug==0), 'Rows', 'Complete')
-[rho, pValue] = corr(STAI_TRAIT(drug==1), persistence_allNodes_neutral(drug==1), 'Rows', 'Complete')
+%legend('alpraz', 'placebo', 'location', 'northeast'); legend boxoff;
+[rho, pValue] = partialcorr(STAI_TRAIT(drug==0), persistence_allNodes_neutral(drug==0), [age(drug==0), gender(drug==0)], 'Rows', 'Complete');
+text(60, 0.25, strcat('\rho=', num2str(rho, 2)), 'Color', 'b', 'FontSize', 14);
+text(60, 0.225, strcat('p=', num2str(pValue, 2)), 'Color', 'b', 'FontSize', 14);
+[rho, pValue] = partialcorr(STAI_TRAIT(drug==1), persistence_allNodes_neutral(drug==1), [age(drug==1), gender(drug==1)], 'Rows', 'Complete');
+text(60, 0.30, strcat('\rho=', num2str(rho, 2)), 'Color', 'r', 'FontSize', 14);
+text(60, 0.275, strcat('p=', num2str(pValue, 2)), 'Color', 'r', 'FontSize', 14);
 ylim([0.2, 0.65]);
 
 %% mixed models for accuracy and reaction time versus persistence for emotionid and emotionrec
@@ -559,23 +685,24 @@ PET_NAT_MRB_c11 = X.data';
 X = importdata(strcat(PETdir, 'SERT_DASB_HC30.nii_lausanne_ROIv_scale125_dilated_resized_3mm.txt'));
 PET_SERT_DASB_HC30 = X.data';
 
-[f, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, hot, [10 80]); close(f(2)); % plotting only right hemisphere
+[f, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, redbluecmap, [0 100]);
 view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
-axis(ax(1), 'off'); colorbar;
-[g, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, hot, [10 80]); close(g(2)); % plotting only right hemisphere
+view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(1), 'off'); axis(ax(2), 'off');
+savePath = strcat(resultsDir, 'PET_GABAa_FLUMAZENIL_c11_cortex1.svg'); saveas(f(1), savePath); close(f(1));
+savePath = strcat(resultsDir, 'PET_GABAa_FLUMAZENIL_c11_cortex2.svg'); saveas(f(2), savePath); close(f(2));
+
+[f, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, redbluecmap, [0 100]);
 view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
-axis(ax(1), 'off'); colorbar;
+view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(1), 'off'); axis(ax(2), 'off');
+savePath = strcat(resultsDir, 'PET_GABAa_FLUMAZENIL_c11_cortex3.svg'); saveas(f(1), savePath); close(f(1));
+savePath = strcat(resultsDir, 'PET_GABAa_FLUMAZENIL_c11_cortex4.svg'); saveas(f(2), savePath); close(f(2));
 
-[f, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, hot, [10 80]); close(f(1)); % plotting only left hemisphere
-view(ax(2), [-90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
-axis(ax(2), 'off'); colorbar;
-[g, ax, ph, ~] = fcn_lausannesurf(PET_GABAa_FLUMAZENIL_c11, hot, [10 80]); close(g(1)); % plotting only left hemisphere
-view(ax(2), [-270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
-axis(ax(2), 'off'); colorbar;
-
-figure;
-[~,f_lat] = plot_subcortvol(PET_GABAa_FLUMAZENIL_c11(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, hot, 10, 80); % visualizing sub-cortical areas
-close(f_lat); colorbar;
+figure; [f1, f2] = plot_subcortvol(PET_GABAa_FLUMAZENIL_c11(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, redbluecmap, 0, 100);
+savePath1 = strcat(resultsDir, 'PET_GABAa_FLUMAZENIL_c11_subcortex1.svg'); saveas(f1, savePath1); 
+savePath2 = strcat(resultsDir, 'PET_GABAa_FLUMAZENIL_c11_subcortex2.svg'); saveas(f2, savePath2); 
+close(f1); close(f2);
 
 %% average control input difference w/ and w/o drug vs PET neurotransmitter maps - emotionid
 
@@ -744,20 +871,21 @@ for c = 1:nContrasts
     
     % plotting coefficients of group main effect versus PET
     % neurotransmitter profiles
-    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
-    set(gca, 'FontSize', 20);
-    
-    xlim([0, 1]);
-    ylim([10, 80]);
-    
-    plot(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
-    [rho, pVal_corr] = corr(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
-    text(0.1, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
-    
-    lsline;
-    xlabel('coefficients of group main effect');
-    ylabel('GABA receptor density');
-    saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlInputGroupEffect_GABA.svg'));
+%     f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+%     set(gca, 'FontSize', 20);
+%     
+%     xlim([0, 1]);
+%     ylim([10, 80]);
+%     
+%     plot(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
+%     [rho, pVal_corr] = corr(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
+%     text(0.8, 20, strcat('\rho=', num2str(rho)), 'Color', 'k', 'FontSize', 12);
+%     text(0.8, 15, strcat('p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+%     
+%     lsline;
+%     xlabel('coefficients of group main effect');
+%     ylabel('GABA receptor density');
+%     saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlInputGroupEffect_GABA.eps'));
     
     % plotting coefficients of drug main effect versus PET
     % neurotransmitter profiles
@@ -769,12 +897,13 @@ for c = 1:nContrasts
     
     plot(betas_drugMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
     [rho, pVal_corr] = corr(betas_drugMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
-    text(0.1, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+    text(0.8, 20, strcat('\rho=', num2str(rho)), 'Color', 'k', 'FontSize', 12);
+    text(0.8, 15, strcat('p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
     
     lsline;
     xlabel('coefficients of drug main effect');
     ylabel('GABA receptor density');
-    saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlInputDrugEffect_GABA.svg'));
+    saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlInputDrugEffect_GABA.eps'));
     
     % plotting coefficients of drug x group interaction versus GABA receptor expression
     f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
@@ -785,12 +914,13 @@ for c = 1:nContrasts
     
     plot(betas_groupDrugInteraction, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
     [rho, pVal_corr] = corr(betas_groupDrugInteraction, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
-    text(0.1, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+    text(0.8, 20, strcat('\rho=', num2str(rho)), 'Color', 'k', 'FontSize', 12);
+    text(0.8, 15, strcat('p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
     
     lsline;
     xlabel('coefficients of group x drug interaction');
     ylabel('GABA receptor density');
-    saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlInputGroupDrugInteraction_GABA.svg'));
+    saveas(f, strcat(resultsDir, 'emotionid_', currentContrast, '_controlInputGroupDrugInteraction_GABA.eps'));
 end
 
 %% control impact vs PET neurotransmitter maps - emotionrec
@@ -843,20 +973,20 @@ for c = 1:nContrasts
     
     % plotting coefficients of group main effect versus PET
     % neurotransmitter profiles
-    f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
-    set(gca, 'FontSize', 20);
-    
-    xlim([0, 1]);
-    ylim([10, 80]);
-    
-    plot(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
-    [rho, pVal_corr] = corr(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
-    text(0.1, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
-    
-    lsline;
-    xlabel('coefficients of group main effect');
-    ylabel('GABA receptor density');
-    saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlInputGroupEffect_GABA.svg'));
+%     f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
+%     set(gca, 'FontSize', 20);
+%     
+%     xlim([0, 1]);
+%     ylim([10, 80]);
+%     
+%     plot(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
+%     [rho, pVal_corr] = corr(betas_groupMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
+%     text(0.1, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+%     
+%     lsline;
+%     xlabel('coefficients of group main effect');
+%     ylabel('GABA receptor density');
+%     saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlInputGroupEffect_GABA.eps'));
     
     % plotting coefficients of drug main effect versus PET
     % neurotransmitter profiles
@@ -868,12 +998,13 @@ for c = 1:nContrasts
     
     plot(betas_drugMain, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
     [rho, pVal_corr] = corr(betas_drugMain, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
-    text(0.1, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+    text(0.8, 20, strcat('\rho=', num2str(rho)), 'Color', 'k', 'FontSize', 12);
+    text(0.8, 15, strcat('p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
     
     lsline;
     xlabel('coefficients of drug main effect');
     ylabel('GABA receptor density');
-    saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlInputDrugEffect_GABA.svg'));
+    saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlInputDrugEffect_GABA.eps'));
     
     % plotting coefficients of drug x group interaction versus GABA receptor expression
     f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
@@ -884,13 +1015,37 @@ for c = 1:nContrasts
     
     plot(betas_groupDrugInteraction, PET_GABAa_FLUMAZENIL_c11, 'k.', 'MarkerSize', 20);
     [rho, pVal_corr] = corr(betas_groupDrugInteraction, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'complete');
-    text(0.1, 78, strcat('\rho=', num2str(rho), ', p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
+    text(0.8, 20, strcat('\rho=', num2str(rho)), 'Color', 'k', 'FontSize', 12);
+    text(0.8, 15, strcat('p=', num2str(pVal_corr)), 'Color', 'k', 'FontSize', 12);
     
     lsline;
     xlabel('coefficients of group x drug interaction');
     ylabel('GABA receptor density');
-    saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlInputGroupDrugInteraction_GABA.svg'));
+    saveas(f, strcat(resultsDir, 'emotionrec_', currentContrast, '_controlInputGroupDrugInteraction_GABA.eps'));
 end
+
+%% plot coefficient maps for neutral emotionrec
+
+betas_drugMain(isnan(betas_drugMain)) = 0;
+
+[f, ax, ph, ~] = fcn_lausannesurf(betas_drugMain, redbluecmap);
+view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
+view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(1), 'off'); axis(ax(2), 'off');
+savePath = strcat(resultsDir, 'betas_drugMain_cortex1.svg'); saveas(f(1), savePath); close(f(1));
+savePath = strcat(resultsDir, 'betas_drugMain_cortex2.svg'); saveas(f(2), savePath); close(f(2));
+
+[f, ax, ph, ~] = fcn_lausannesurf(betas_drugMain, redbluecmap);
+view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
+view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
+axis(ax(1), 'off'); axis(ax(2), 'off');
+savePath = strcat(resultsDir, 'betas_drugMain_cortex3.svg'); saveas(f(1), savePath); close(f(1));
+savePath = strcat(resultsDir, 'betas_drugMain_cortex4.svg'); saveas(f(2), savePath); close(f(2));
+
+figure; [f1, f2] = plot_subcortvol(betas_drugMain(subcorticalIndices), subcorticalIndices, subcorticalIndices, nifti, redbluecmap);
+savePath1 = strcat(resultsDir, 'betas_drugMain_subcortex1.svg'); saveas(f1, savePath1); 
+savePath2 = strcat(resultsDir, 'betas_drugMain_subcortex2.svg'); saveas(f2, savePath2); 
+close(f1); close(f2);
 
 %% plot GABA(A) receptor expression from Allen atlas
 
