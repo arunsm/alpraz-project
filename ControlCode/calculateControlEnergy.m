@@ -83,7 +83,7 @@ for n = 1:numel(normalizationMethods)
                                 mkdir(resultsDir);
                             end
                             
-                            fid = fopen(strcat(resultsDir, 'calculateOptEnergy_parameters.csv'), 'w');
+                            fid = fopen(strcat(resultsDir, 'controlEnergy_parameters.csv'), 'w');
                             fprintf(fid, 'controlAlgorithm,normalizationMethod,avge_FD_thresh,parcelCoverageThresh,T,rho,controlInputs,structuralEdges,brainStates\n%s,%s,%d,%d,%d,%d,%s,%s,%s', ...
                                 controlAlgorithm, currentNormalizationMethod, current_FD_thresh, currentParcelCoverageThresh, T, rho, currentControlInputs, currentStructuralEdges, currentBrainStates);
                             fclose(fid);
@@ -387,8 +387,10 @@ for n = 1:numel(normalizationMethods)
                             
 %                             writetable(allControlEnergies_emotionid, strcat(resultsDir, 'allControlEnergies_emotionid.csv'));
 %                             writetable(allControlEnergies_emotionrec, strcat(resultsDir, 'allControlEnergies_emotionrec.csv'));
-                            
-                            createContrastFiles(resultsDir);
+
+                            baseName_emotionid = strcat(resultsDir, 'allControlEnergies_emotionid_iteration', num2str(iter_nullModel2));
+                            baseName_emotionrec = strcat(resultsDir, 'allControlEnergies_emotionrec_iteration', num2str(iter_nullModel2));
+                            createContrastFiles(baseName_emotionid, baseName_emotionrec);
                             
                             %                            save(strcat(resultsDir, 'allControlTrajectories_emotionid_iteration', num2str(iter), '.mat'), 'allControlTrajectories_emotionid');
                             %                            save(strcat(resultsDir, 'allControlTrajectories_emotionrec_iteration', num2str(iter), '.mat'), 'allControlTrajectories_emotionrec');
