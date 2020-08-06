@@ -378,5 +378,5 @@ for iter_nullModel2 = 1:nIterations_nullModel2
     save(strcat(resultsDir, 'allControlTrajectories_emotionid.mat'), 'allControlTrajectories_emotionid');
     save(strcat(resultsDir, 'allControlTrajectories_emotionrec.mat'), 'allControlTrajectories_emotionrec');
     
-    save(strcat(resultsDir, 'structuralAdjacencyMatrix_iteration', num2str(iter_nullModel2), '.mat'), 'A');
+    save(strcat(resultsDir, 'structuralAdjacencyMatrix_iteration.mat'), 'A');
 end
