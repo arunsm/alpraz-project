@@ -12,7 +12,7 @@ normalizationMethod = 'EuclideanNorm'; % possible values = {'EuclideanNorm', 'no
 controlAlgorithm = 'minimalControl'; % possible values = {'minimalControl', 'optimalControl'}
 avge_FD_thresh = 0.5; % threshold for eliminating subjects based on motion (in mm)
 parcelCoverageThresh = 0.5; % threshold for keeping a parcel based on coverage in subject mask
-structuralEdges = 'QA'; % possible values = {'QA', 'StreamlineCounts', 'nullModel1', 'nullModel2'}
+structuralEdges = 'StreamlineCounts'; % possible values = {'QA', 'StreamlineCounts', 'nullModel1', 'nullModel2'}
 controlSet = 'allNodes'; % possible values = {'allNodes', 'cognitiveControlRegions', 'visual_subcortex'}
 
 nIterations_spinTest = 500; % number of iterations for spin test
@@ -161,7 +161,7 @@ for iter_nullModel2 = 1:nIterations_nullModel2
                         
                         pathToMask = strcat(rootFolder_contrasts, currentSubjectID_str, filesep, currentSessionID_str, filesep, currentTaskID, '/norm/', currentSubjectID_str, '_', currentSessionID_str, '_', currentTaskID, '_maskStd_', atlasLabel, '.txt');
                         M = importdata(pathToMask);
-                        parcelCoverage = M.data';
+                        parcelCoverage = M.data'; parcelCoverage(idx_brainstem) = [];
                         parcelsToInclude = parcelCoverage > parcelCoverageThresh; % boolean list of parcels whose coverage exceeds the threshold
                         parcelsToInclude_idx = find(parcelCoverage > parcelCoverageThresh);
                         nNodes_currentSubject = numel(parcelsToInclude_idx);
@@ -378,5 +378,5 @@ for iter_nullModel2 = 1:nIterations_nullModel2
     save(strcat(resultsDir, 'allControlTrajectories_emotionid.mat'), 'allControlTrajectories_emotionid');
     save(strcat(resultsDir, 'allControlTrajectories_emotionrec.mat'), 'allControlTrajectories_emotionrec');
     
-    save(strcat(resultsDir, 'structuralAdjacencyMatrix_iteration.mat'), 'A');
+    save(strcat(resultsDir, 'structuralAdjacencyMatrix.mat'), 'A');
 end

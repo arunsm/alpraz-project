@@ -1,0 +1,10 @@
+AHBA_path = '../../data/GeneExpression/ParcellatedGeneExpressionLausanne125.mat';
+load(AHBA_path);
+GABRA1 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRA1'));
+GABRA2 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRA2'));
+GABRA3 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRA3'));
+GABRA5 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRA5'));
+GABRB1 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRB1'));
+GABRB2 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRB2'));
+GABRB3 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRB3'));
+GABRG2 = lausanneParcelExpression(:, strcmp(gene_names, 'GABRG2'));
