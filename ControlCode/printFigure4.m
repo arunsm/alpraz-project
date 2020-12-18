@@ -11,6 +11,7 @@ end
 %% plot matrix of PET maps arranged by Yeo7 systems
 
 PET_maps = [PET_5HT1a_WAY_HC36 PET_5HT1b_P943_HC22 PET_5HT2a_ALT_HC19 PET_D1_SCH23390_c11 PET_D2_RACLOPRIDE_c11 PET_DAT_DATSPECT PET_FDOPA_f18 PET_GABAa_FLUMAZENIL_c11 PET_NAT_MRB_c11 PET_SERT_DASB_HC30];
+PET_maps(idx_brainstem, :) = [];
 PET_maps_Yeo7 = rearrangeMatrix_Yeo7(PET_maps);
 nMaps = size(PET_maps_Yeo7, 2);
 f = figure('Visible', 'off'); set(gcf, 'color', 'white'); hold on;
@@ -28,6 +29,21 @@ xlim([0.5, nMaps+0.5]); ylim([0, nNodes]);
 % h = refline(0, refLines(8)); h.Color = 'g'; h.LineWidth = 2; %text(nSubjects, mean([refLines(7), refLines(8)]), 'Subcortical');
 
 saveas(f, strcat(resultsDirCurrentFigure, 'PET_allMaps_Yeo7.svg'));
+surfacePlots(PET_GABAa_FLUMAZENIL_c11, redbluecmap, [0 100], nifti, subcorticalIndices, resultsDirCurrentFigure, 'PET_GABAa_FLUMAZENIL_c11.svg');
+
+%% creating random maps using spin test
+% nRandomizations = 500;
+% spinTestSavePath = strcat(resultsDirCurrentFigure, 'spinTestResults');
+% fprintf('1\n'); PET_5HT1a_WAY_HC36_random = calculateScrambledBetas(PET_5HT1a_WAY_HC36, strcat(spinTestSavePath, '_PET_5HT1a_WAY_HC36'), nRandomizations);
+% fprintf('2\n'); PET_5HT1b_P943_HC22_random = calculateScrambledBetas(PET_5HT1b_P943_HC22, strcat(spinTestSavePath, '_PET_5HT1b_P943_HC22'), nRandomizations);
+% fprintf('3\n'); PET_5HT2a_ALT_HC19_random = calculateScrambledBetas(PET_5HT2a_ALT_HC19, strcat(spinTestSavePath, '_PET_5HT2a_ALT_HC19'), nRandomizations);
+% fprintf('4\n'); PET_D1_SCH23390_c11_random = calculateScrambledBetas(PET_D1_SCH23390_c11, strcat(spinTestSavePath, '_PET_D1_SCH23390_c11'), nRandomizations);
+% fprintf('5\n'); PET_D2_RACLOPRIDE_c11_random = calculateScrambledBetas(PET_D2_RACLOPRIDE_c11, strcat(spinTestSavePath, '_PET_D2_RACLOPRIDE_c11'), nRandomizations);
+% fprintf('6\n'); PET_DAT_DATSPECT_random = calculateScrambledBetas(PET_DAT_DATSPECT, strcat(spinTestSavePath, '_PET_DAT_DATSPECT'), nRandomizations);
+% fprintf('7\n'); PET_FDOPA_f18_random = calculateScrambledBetas(PET_FDOPA_f18, strcat(spinTestSavePath, '_PET_FDOPA_f18'), nRandomizations);
+% fprintf('8\n'); PET_GABAa_FLUMAZENIL_c11_random = calculateScrambledBetas(PET_GABAa_FLUMAZENIL_c11, strcat(spinTestSavePath, '_PET_GABAa_FLUMAZENIL_c11'), nRandomizations);
+% fprintf('9\n'); PET_NAT_MRB_c11_random = calculateScrambledBetas(PET_NAT_MRB_c11, strcat(spinTestSavePath, '_PET_NAT_MRB_c11'), nRandomizations);
+% fprintf('10\n'); PET_SERT_DASB_HC30_random = calculateScrambledBetas(PET_SERT_DASB_HC30, strcat(spinTestSavePath, '_PET_SERT_DASB_HC30'), nRandomizations);
 
 %% average control input difference w/ and w/o drug vs PET neurotransmitter maps - emotionid
 
@@ -58,10 +74,10 @@ for c = 1:nContrasts
     avge_controlInputDiff_emotionid_currentContrast = mean(controlInputDiff_emotionid_currentContrast, 2); % average across subjects
     
     % fit linear model
-    T = table(avge_controlInputDiff_emotionid_currentContrast, PET_5HT1a_WAY_HC36, PET_5HT1b_P943_HC22, PET_5HT2a_ALT_HC19, PET_D1_SCH23390_c11, PET_D2_RACLOPRIDE_c11, PET_DAT_DATSPECT, PET_FDOPA_f18, PET_GABAa_FLUMAZENIL_c11, PET_NAT_MRB_c11, PET_SERT_DASB_HC30);
-    linearModel_currentContrast = fitlm(T, 'ResponseVar', 'avge_controlInputDiff_emotionid_currentContrast');
-    savePath = strcat(resultsDirCurrentFigure, 'linearModel_emotionid_', currentContrast, '.mat');
-    save(savePath, 'linearModel_currentContrast');
+%     T = table(avge_controlInputDiff_emotionid_currentContrast, PET_5HT1a_WAY_HC36, PET_5HT1b_P943_HC22, PET_5HT2a_ALT_HC19, PET_D1_SCH23390_c11, PET_D2_RACLOPRIDE_c11, PET_DAT_DATSPECT, PET_FDOPA_f18, PET_GABAa_FLUMAZENIL_c11, PET_NAT_MRB_c11, PET_SERT_DASB_HC30);
+%     linearModel_currentContrast = fitlm(T, 'ResponseVar', 'avge_controlInputDiff_emotionid_currentContrast');
+%     spinTestSavePath = strcat(resultsDirCurrentFigure, 'linearModel_emotionid_', currentContrast, '.mat');
+%     save(spinTestSavePath, 'linearModel_currentContrast');
     
     % find Lausanne nodes with high difference in control input b/w drug
     % and placebo
@@ -78,47 +94,33 @@ for c = 1:nContrasts
     % plot surface maps of differences in control input b/w alpraz and
     % placebo, averaged across subjects
     avge_controlInputDiff_emotionid_currentContrast(isnan(avge_controlInputDiff_emotionid_currentContrast)) = 0;
-    %surfacePlots(avge_controlInputDiff_emotionid_currentContrast, redbluecmap, [0 0.015], nifti, subcorticalIndices, resultsDirCurrentFigure, strcat('emotionid_', currentContrast, 'controlInputDiff_heatmap_drug_vs_noDrug.svg'));
+    surfacePlots([avge_controlInputDiff_emotionid_currentContrast; 0], redbluecmap, [0 0.015], nifti, subcorticalIndices, resultsDirCurrentFigure, strcat('emotionid_', currentContrast, 'controlInputDiff_heatmap_drug_vs_noDrug.svg'));
     
     % compute correlations between control input differences w/ and w/o drug against PET maps
     controlInputDiff_emotionid_currentContrast_PETatlasCorrs = corr(controlInputDiff_emotionid_currentContrast, PET_maps, 'Type', 'Spearman', 'Rows', 'Complete');
     avge_controlInputDiff_emotionid_currentContrast_PETatlasCorrs = mean(controlInputDiff_emotionid_currentContrast_PETatlasCorrs); % average correlation across subjects
-        
+    
     % compute correlations between control input difference against PET
     % maps, after randomizing placebo data or PET maps
-    nRandomizations = 500;
+    %nRandomizations = 500;
     rng(0); % reset random number generator
     randomCorrs = zeros(nRandomizations, numel(PETlabels));
-    parcelsToInclude_emotionid_allSubjects_placebo = parcelsToInclude_emotionid(drug==1);
-    nSubjects = size(controlInput_emotionid_currentContrast_placebo, 1);
-    for i = 1:nRandomizations
-        %         controlInput_emotionid_currentContrast_placebo_randomized = NaN(nSubjects, nNodes);
-        %         for j = 1:nSubjects
-        %             controlInput_emotionid_currentSubject_placebo = controlInput_emotionid_currentContrast_placebo(j, :);
-        %             parcelsToInclude_currentSubject = parcelsToInclude_emotionid_allSubjects_placebo{j};
-        %             controlInput_emotionid_currentContrast_placebo_randomized(j, parcelsToInclude_currentSubject) = randomizeMatrix(controlInput_emotionid_currentSubject_placebo(parcelsToInclude_currentSubject));
-        %         end
-        %
-        %         controlInputDiff_emotionid_currentContrast_random = abs(controlInput_emotionid_currentContrast_alpraz - controlInput_emotionid_currentContrast_placebo_randomized)';
-        %
-        %
-        %         % compute correlations between control input differences w/ and w/o drug against PET maps
-        %         controlInputDiff_emotionid_currentContrast_PETatlasCorrs_random = [corr(controlInputDiff_emotionid_currentContrast_random, PET_5HT1a_WAY_HC36, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_5HT1b_P943_HC22, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_5HT2a_ALT_HC19, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_D1_SCH23390_c11, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_D2_RACLOPRIDE_c11, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_DAT_DATSPECT, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_FDOPA_f18, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_NAT_MRB_c11, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_SERT_DASB_HC30, 'Type', 'Spearman', 'Rows', 'Complete')];
-        %
-        
-        PET_maps_random = randomizeMatrix(PET_maps')';
-        controlInputDiff_emotionid_currentContrast_PETatlasCorrs_random = corr(controlInputDiff_emotionid_currentContrast, PET_maps_random, 'Type', 'Spearman', 'Rows', 'Complete');
-        randomCorrs(i, :) = mean(controlInputDiff_emotionid_currentContrast_PETatlasCorrs_random);
-    end
+    
+%     for i = 1:nRandomizations
+%         PET_maps_random = [PET_5HT1a_WAY_HC36_random(:, i) PET_5HT1b_P943_HC22_random(:, i) ...
+%             PET_5HT2a_ALT_HC19_random(:, i) PET_D1_SCH23390_c11_random(:, i) PET_D2_RACLOPRIDE_c11_random(:, i) ...
+%             PET_DAT_DATSPECT_random(:, i) PET_FDOPA_f18_random(:, i) PET_GABAa_FLUMAZENIL_c11_random(:, i) ...
+%             PET_NAT_MRB_c11_random(:, i) PET_SERT_DASB_HC30_random(:, i)]; % compile random maps for i'th iteration
+%         PET_maps_random(idx_brainstem, :) = [];
+%         controlInputDiff_emotionid_currentContrast_PETatlasCorrs_random = corr(controlInputDiff_emotionid_currentContrast, PET_maps_random, 'Type', 'Spearman', 'Rows', 'Complete');
+%         randomCorrs(i, :) = mean(controlInputDiff_emotionid_currentContrast_PETatlasCorrs_random);
+%     end
+    
+        for i = 1:nRandomizations
+            PET_maps_random = randomizeMatrix(PET_maps')';
+            controlInputDiff_emotionid_currentContrast_PETatlasCorrs_random = corr(controlInputDiff_emotionid_currentContrast, PET_maps_random, 'Type', 'Spearman', 'Rows', 'Complete');
+            randomCorrs(i, :) = mean(controlInputDiff_emotionid_currentContrast_PETatlasCorrs_random);
+        end
     
     pValues = zeros(1, numel(PETlabels));
     for i = 1:numel(PETlabels)
@@ -184,10 +186,10 @@ for c = 1:nContrasts
     avge_controlInputDiff_emotionrec_currentContrast = mean(controlInputDiff_emotionrec_currentContrast, 2); % average across subjects
     
     % fit linear model
-    T = table(avge_controlInputDiff_emotionrec_currentContrast, PET_5HT1a_WAY_HC36, PET_5HT1b_P943_HC22, PET_5HT2a_ALT_HC19, PET_D1_SCH23390_c11, PET_D2_RACLOPRIDE_c11, PET_DAT_DATSPECT, PET_FDOPA_f18, PET_GABAa_FLUMAZENIL_c11, PET_NAT_MRB_c11, PET_SERT_DASB_HC30);
-    linearModel_currentContrast = fitlm(T, 'ResponseVar', 'avge_controlInputDiff_emotionrec_currentContrast');
-    savePath = strcat(resultsDirCurrentFigure, 'linearModel_emotionrec_', currentContrast, '.mat');
-    save(savePath, 'linearModel_currentContrast');
+%     T = table(avge_controlInputDiff_emotionrec_currentContrast, PET_5HT1a_WAY_HC36, PET_5HT1b_P943_HC22, PET_5HT2a_ALT_HC19, PET_D1_SCH23390_c11, PET_D2_RACLOPRIDE_c11, PET_DAT_DATSPECT, PET_FDOPA_f18, PET_GABAa_FLUMAZENIL_c11, PET_NAT_MRB_c11, PET_SERT_DASB_HC30);
+%     linearModel_currentContrast = fitlm(T, 'ResponseVar', 'avge_controlInputDiff_emotionrec_currentContrast');
+%     spinTestSavePath = strcat(resultsDirCurrentFigure, 'linearModel_emotionrec_', currentContrast, '.mat');
+%     save(spinTestSavePath, 'linearModel_currentContrast');
     
     % find Lausanne nodes with high difference in control input b/w drug
     % and placebo
@@ -204,7 +206,7 @@ for c = 1:nContrasts
     % plot surface maps of differences in control input b/w alpraz and
     % placebo, averaged across subjects
     avge_controlInputDiff_emotionrec_currentContrast(isnan(avge_controlInputDiff_emotionrec_currentContrast)) = 0;
-    surfacePlots(avge_controlInputDiff_emotionrec_currentContrast, redbluecmap, [0 0.015], nifti, subcorticalIndices, resultsDirCurrentFigure, strcat('emotionrec_', currentContrast, 'controlInputDiff_heatmap_drug_vs_noDrug.svg'));
+    surfacePlots([avge_controlInputDiff_emotionrec_currentContrast; 0], redbluecmap, [0 0.015], nifti, subcorticalIndices, resultsDirCurrentFigure, strcat('emotionrec_', currentContrast, 'controlInputDiff_heatmap_drug_vs_noDrug.svg'));
     
     % compute correlations between control input differences w/ and w/o drug against PET maps
     controlInputDiff_emotionrec_currentContrast_PETatlasCorrs = corr(controlInputDiff_emotionrec_currentContrast, PET_maps, 'Type', 'Spearman', 'Rows', 'Complete');
@@ -215,32 +217,18 @@ for c = 1:nContrasts
     nRandomizations = 500;
     rng(0); % reset random number generator
     randomCorrs = zeros(nRandomizations, numel(PETlabels));
-    parcelsToInclude_emotionrec_allSubjects_placebo = parcelsToInclude_emotionrec(drug==1);
-    nSubjects = size(controlInput_emotionrec_currentContrast_placebo, 1);
-    for i = 1:nRandomizations
-        %         controlInput_emotionid_currentContrast_placebo_randomized = NaN(nSubjects, nNodes);
-        %         for j = 1:nSubjects
-        %             controlInput_emotionid_currentSubject_placebo = controlInput_emotionid_currentContrast_placebo(j, :);
-        %             parcelsToInclude_currentSubject = parcelsToInclude_emotionid_allSubjects_placebo{j};
-        %             controlInput_emotionid_currentContrast_placebo_randomized(j, parcelsToInclude_currentSubject) = randomizeMatrix(controlInput_emotionid_currentSubject_placebo(parcelsToInclude_currentSubject));
-        %         end
-        %
-        %         controlInputDiff_emotionid_currentContrast_random = abs(controlInput_emotionid_currentContrast_alpraz - controlInput_emotionid_currentContrast_placebo_randomized)';
-        %
-        %
-        %         % compute correlations between control input differences w/ and w/o drug against PET maps
-        %         controlInputDiff_emotionid_currentContrast_PETatlasCorrs_random = [corr(controlInputDiff_emotionid_currentContrast_random, PET_5HT1a_WAY_HC36, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_5HT1b_P943_HC22, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_5HT2a_ALT_HC19, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_D1_SCH23390_c11, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_D2_RACLOPRIDE_c11, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_DAT_DATSPECT, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_FDOPA_f18, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_GABAa_FLUMAZENIL_c11, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_NAT_MRB_c11, 'Type', 'Spearman', 'Rows', 'Complete'), ...
-        %             corr(controlInputDiff_emotionid_currentContrast_random, PET_SERT_DASB_HC30, 'Type', 'Spearman', 'Rows', 'Complete')];
-        %
-        
+    
+%     for i = 1:nRandomizations
+%         PET_maps_random = [PET_5HT1a_WAY_HC36_random(:, i) PET_5HT1b_P943_HC22_random(:, i) ...
+%             PET_5HT2a_ALT_HC19_random(:, i) PET_D1_SCH23390_c11_random(:, i) PET_D2_RACLOPRIDE_c11_random(:, i) ...
+%             PET_DAT_DATSPECT_random(:, i) PET_FDOPA_f18_random(:, i) PET_GABAa_FLUMAZENIL_c11_random(:, i) ...
+%             PET_NAT_MRB_c11_random(:, i) PET_SERT_DASB_HC30_random(:, i)]; % compile random maps for i'th iteration
+%         PET_maps_random(idx_brainstem, :) = [];
+%         controlInputDiff_emotionrec_currentContrast_PETatlasCorrs_random = corr(controlInputDiff_emotionrec_currentContrast, PET_maps_random, 'Type', 'Spearman', 'Rows', 'Complete');
+%         randomCorrs(i, :) = mean(controlInputDiff_emotionrec_currentContrast_PETatlasCorrs_random);
+%     end
+    
+    for i = 1:nRandomizations        
         PET_maps_random = randomizeMatrix(PET_maps')';
         controlInputDiff_emotionrec_currentContrast_PETatlasCorrs_random = corr(controlInputDiff_emotionrec_currentContrast, PET_maps_random, 'Type', 'Spearman', 'Rows', 'Complete');
         randomCorrs(i, :) = mean(controlInputDiff_emotionrec_currentContrast_PETatlasCorrs_random);

@@ -4,7 +4,7 @@
 function [] = surfacePlots(metricToPlot, cmap, clims, nifti, subcorticalIndices, resultsDir, savePathBaseName)
 
 % cortex - left hemisphere (2 plots)
-[f, ax, ph, ~] = fcn_lausannesurf(metricToPlot, cmap, clims);
+[f, ax, ph, ~] = fcn_lausannesurf(metricToPlot, cmap);
 view(ax(1), [-90, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 view(ax(2), [90, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');
@@ -12,7 +12,7 @@ savePath = strcat(resultsDir, savePathBaseName, '_cortex1.svg'); saveas(f(1), sa
 savePath = strcat(resultsDir, savePathBaseName, '_cortex2.svg'); saveas(f(2), savePath); close(f(2)); 
 
 % cortex - right hemisphere (2 plots)
-[f, ax, ph, ~] = fcn_lausannesurf(metricToPlot, cmap, clims);
+[f, ax, ph, ~] = fcn_lausannesurf(metricToPlot, cmap);
 view(ax(1), [-270, 0]); lighting(ax(1), 'gouraud'); camlight(ax(1), 'headlight'); material(ph(1), 'dull');
 view(ax(2), [270, 0]); lighting(ax(2), 'gouraud'); camlight(ax(2), 'headlight'); material(ph(2), 'dull');
 axis(ax(1), 'off'); axis(ax(2), 'off');

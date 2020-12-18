@@ -26,10 +26,11 @@ for i = 1:nContrasts
     coefficientEstimates_emotionid_currentContrast = mixedModel_emotionid_currentContrast.Coefficients.Estimate;
     coefficientNames_emotionid_currentContrast = mixedModel_emotionid_currentContrast.Coefficients.Name;
     nCoefficients = numel(coefficientNames_emotionid_currentContrast);
-    
+      
     % fit mixed models to null data and compute coefficients
     coefficientEstimates_emotionid_nullModel_currentContrast = zeros(nCoefficients, nIterations);
-    pValues_emotionid_nullModel_currentContrast = zeros(nCoefficients, 1);
+    pValues_emotionid_nullModel_currentContrast = zeros(nCoefficients, nIterations);
+    %pValues_emotionid_nullModel_currentContrast = zeros(nCoefficients, 1);
     for j = 1:nIterations
         fprintf('iteration %d\n', j);
         allControlEnergies_emotionid_nullModel = readtable(strcat(resultsDir_nullModel, 'allControlEnergies_emotionid_iteration', num2str(j), '.csv'));
@@ -43,12 +44,15 @@ for i = 1:nContrasts
         currentModelFormula = strcat('persistence_allNodes ~ drug + group + drug*group + gender + age + (1|subjectID)');
         mixedModel_emotionid_nullModel_currentContrast = fitlme(allControlEnergies_emotionid_nullModel_currentContrast, currentModelFormula, 'FitMethod', 'ML');
         coefficientEstimates_emotionid_nullModel_currentContrast(:, j) = mixedModel_emotionid_nullModel_currentContrast.Coefficients.Estimate;
-        pValues_emotionid_nullModel_currentContrast = pValues_emotionid_nullModel_currentContrast + double((abs(coefficientEstimates_emotionid_currentContrast) > abs(coefficientEstimates_emotionid_nullModel_currentContrast(:, j))));
+        %pValues_emotionid_nullModel_currentContrast = pValues_emotionid_nullModel_currentContrast + double((abs(coefficientEstimates_emotionid_currentContrast) > abs(coefficientEstimates_emotionid_nullModel_currentContrast(:, j))));
+        pValues_emotionid_nullModel_currentContrast(:, j) = mixedModel_emotionid_nullModel_currentContrast.Coefficients.pValue;
     end
     
     % store coefficients and exact p-values
-    pValues_emotionid_nullModel_currentContrast = 1 - pValues_emotionid_nullModel_currentContrast/nIterations;
-    T = table(coefficientNames_emotionid_currentContrast, pValues_emotionid_nullModel_currentContrast, coefficientEstimates_emotionid_currentContrast, coefficientEstimates_emotionid_nullModel_currentContrast);
+    %pValues_emotionid_nullModel_currentContrast = 1 - pValues_emotionid_nullModel_currentContrast/nIterations;
+    sum_significant_emotionid_nullModel_currentContrast = sum((pValues_emotionid_nullModel_currentContrast < 0.05), 2);
+    T = table(coefficientNames_emotionid_currentContrast, sum_significant_emotionid_nullModel_currentContrast, coefficientEstimates_emotionid_currentContrast, coefficientEstimates_emotionid_nullModel_currentContrast);
+    %T = table(coefficientNames_emotionid_currentContrast, pValues_emotionid_nullModel_currentContrast, coefficientEstimates_emotionid_currentContrast, coefficientEstimates_emotionid_nullModel_currentContrast);
     saveFilePath = strcat(resultsDirCurrentFigure, 'structuralNullResults_emotionid_', currentContrast, '.csv');
     writetable(T, saveFilePath);
 end
@@ -73,7 +77,8 @@ for i = 1:nContrasts
     
     % fit mixed models to null data and compute coefficients
     coefficientEstimates_emotionrec_nullModel_currentContrast = zeros(nCoefficients, nIterations);
-    pValues_emotionrec_nullModel_currentContrast = zeros(nCoefficients, 1);
+    pValues_emotionrec_nullModel_currentContrast = zeros(nCoefficients, nIterations);
+    %pValues_emotionrec_nullModel_currentContrast = zeros(nCoefficients, 1);
     for j = 1:nIterations
         fprintf('iteration %d\n', j);
         allControlEnergies_emotionrec_nullModel = readtable(strcat(resultsDir_nullModel, 'allControlEnergies_emotionrec_iteration', num2str(j), '.csv'));
@@ -87,12 +92,15 @@ for i = 1:nContrasts
         currentModelFormula = strcat('persistence_allNodes ~ drug + group + drug*group + gender + age + (1|subjectID)');
         mixedModel_emotionrec_nullModel_currentContrast = fitlme(allControlEnergies_emotionrec_nullModel_currentContrast, currentModelFormula, 'FitMethod', 'ML');
         coefficientEstimates_emotionrec_nullModel_currentContrast(:, j) = mixedModel_emotionrec_nullModel_currentContrast.Coefficients.Estimate;
-        pValues_emotionrec_nullModel_currentContrast = pValues_emotionrec_nullModel_currentContrast + double((abs(coefficientEstimates_emotionrec_currentContrast) > abs(coefficientEstimates_emotionrec_nullModel_currentContrast(:, j))));
+        %pValues_emotionrec_nullModel_currentContrast = pValues_emotionrec_nullModel_currentContrast + double((abs(coefficientEstimates_emotionrec_currentContrast) > abs(coefficientEstimates_emotionrec_nullModel_currentContrast(:, j))));
+        pValues_emotionrec_nullModel_currentContrast(:, j) = mixedModel_emotionrec_nullModel_currentContrast.Coefficients.pValue;
     end
     
     % store coefficients and exact p-values
-    pValues_emotionrec_nullModel_currentContrast = 1 - pValues_emotionrec_nullModel_currentContrast/nIterations;
-    T = table(coefficientNames_emotionrec_currentContrast, pValues_emotionrec_nullModel_currentContrast, coefficientEstimates_emotionrec_currentContrast, coefficientEstimates_emotionrec_nullModel_currentContrast);
+    %pValues_emotionrec_nullModel_currentContrast = 1 - pValues_emotionrec_nullModel_currentContrast/nIterations;
+    %T = table(coefficientNames_emotionrec_currentContrast, pValues_emotionrec_nullModel_currentContrast, coefficientEstimates_emotionrec_currentContrast, coefficientEstimates_emotionrec_nullModel_currentContrast);
+    sum_significant_emotionrec_nullModel_currentContrast = sum((pValues_emotionrec_nullModel_currentContrast < 0.05), 2);
+    T = table(coefficientNames_emotionrec_currentContrast, sum_significant_emotionrec_nullModel_currentContrast, coefficientEstimates_emotionrec_currentContrast, coefficientEstimates_emotionrec_nullModel_currentContrast);
     saveFilePath = strcat(resultsDirCurrentFigure, 'structuralNullResults_emotionrec_', currentContrast, '.csv');
     writetable(T, saveFilePath);
 end

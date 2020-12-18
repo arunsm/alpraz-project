@@ -12,12 +12,12 @@ function [lh_surf_data, rh_surf_data] = convertData2LausanneSurface(data)
 mid = 116; % dividing index for 234-node parcellation
 %addpath(genpath('/Applications/freesurfer/matlab'));
 
-X = importdata('../../lausanne2008/LausanneParcelNames.xlsx');
+X = importdata('../../data/lausanne2008/LausanneParcelNames.xlsx');
 LausanneParcelNames = X.textdata;
 
 % read annotation of Lausanne parcels in fsaverage5
-[Rv, RL, Rct] = read_annotation('../../Lausanne_surfaceData_fsaverage5/rh.myaparc_125.annot');
-[Lv, LL, Lct] = read_annotation('../../Lausanne_surfaceData_fsaverage5/lh.myaparc_125.annot');
+[Rv, RL, Rct] = read_annotation('../../data/Lausanne_surfaceData_fsaverage5/rh.myaparc_125.annot');
+[Lv, LL, Lct] = read_annotation('../../data/Lausanne_surfaceData_fsaverage5/lh.myaparc_125.annot');
 
 %% create annotations containing parcel ID for each vertex
 

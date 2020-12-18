@@ -43,7 +43,7 @@ for c = 1:nContrasts
     writetable(emotionid_betas_nodeNames, strcat(resultsDirCurrentFigure, 'emotionid_betas_nodeNames_', currentContrast, '.csv'));
 end
 
-avgeBetas_emotionid_allSubjects(isnan(avgeBetas_emotionid_allSubjects)) = -1000; % setting NaN values (outside slab) to large negative value for plotting
+avgeBetas_emotionid_allSubjects(isnan(avgeBetas_emotionid_allSubjects)) = -0.3; % setting NaN values (outside slab) to large negative value for plotting
 surfacePlots(avgeBetas_emotionid_allSubjects(:, 1), redbluecmap, [-0.2 0.2], nifti, ...
     subcorticalIndices, resultsDirCurrentFigure, 'avge_betas_emotionid_threat');
 
@@ -81,7 +81,7 @@ for c = 1:nContrasts
     writetable(emotionrec_betas_nodeNames, strcat(resultsDirCurrentFigure, 'emotionrec_betas_nodeNames_', currentContrast, '.csv'));
 end
 
-avgeBetas_emotionrec_allSubjects(isnan(avgeBetas_emotionrec_allSubjects)) = -1000; % setting NaN values (outside slab) to 0
+avgeBetas_emotionrec_allSubjects(isnan(avgeBetas_emotionrec_allSubjects)) = -0.3; % setting NaN values (outside slab) to 0
 surfacePlots(avgeBetas_emotionrec_allSubjects(:, 1), redbluecmap, [-0.2 0.2], nifti, ...
     subcorticalIndices, resultsDirCurrentFigure, 'avgeBetas_emotionrec_threat');
 end

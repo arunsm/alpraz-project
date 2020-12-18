@@ -161,7 +161,11 @@ for c = 1:nContrasts
 end
 
 avgeControlImpact_emotionid_allSubjects(isnan(avgeControlImpact_emotionid_allSubjects)) = 0; % setting NaN values (outside slab) to 0 for visualization
-surfacePlots(avgeControlImpact_emotionid_allSubjects(:, 1), redbluecmap, [0 1.5], nifti, ...
+cmap = redbluecmap;
+%cmap = cmap(6:end, :);
+C = avgeControlImpact_emotionid_allSubjects(:, 1);
+C(234, 1) = 0;
+surfacePlots(C, cmap, [min(C) - 0.1*range(C), max(C) + 0.1*range(C)], nifti, ...
     subcorticalIndices, resultsDirCurrentFigure, 'avgeControlImpact_emotionid_threat');
 
 % emotionrec
@@ -198,7 +202,11 @@ for c = 1:nContrasts
     writetable(emotionrec_controlImpact_nodeNames, strcat(resultsDirCurrentFigure, 'emotionrec_controlImpact_nodeNames_', currentContrast, '.csv'));
 end
 
-avgeControlImpact_emotionrec_allSubjects(isnan(avgeControlImpact_emotionrec_allSubjects)) = 0; % setting NaN values (outside slab) to 0    
-surfacePlots(avgeControlImpact_emotionrec_allSubjects(:, 1), redbluecmap, [0 1.5], nifti, ...
+avgeControlImpact_emotionrec_allSubjects(isnan(avgeControlImpact_emotionrec_allSubjects)) = 0; % setting NaN values (outside slab) to 0
+cmap = redbluecmap;
+%cmap = cmap(6:end, :);
+C = avgeControlImpact_emotionrec_allSubjects(:, 1);
+C(234, 1) = 0;
+surfacePlots(C, cmap, [min(C) - 0.1*range(C), max(C) + 0.1*range(C)], nifti, ...
     subcorticalIndices, resultsDirCurrentFigure, 'avgeControlImpact_emotionrec_threat');
 end

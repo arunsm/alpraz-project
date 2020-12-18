@@ -12,8 +12,8 @@ mid = 116; % dividing index for 234-node parcellation
 %addpath(genpath('/Applications/freesurfer/matlab'));
 
 % load fsaverage5 files containing parcel IDs for each vertex
-load('../../Lausanne_surfaceData_fsaverage5/lh_surf_LausanneParcelIDs.mat', 'lh_surf_LausanneParcelIDs');
-load('../../Lausanne_surfaceData_fsaverage5/rh_surf_LausanneParcelIDs.mat', 'rh_surf_LausanneParcelIDs');
+load('../../data/Lausanne_surfaceData_fsaverage5/lh_surf_LausanneParcelIDs.mat', 'lh_surf_LausanneParcelIDs');
+load('../../data/Lausanne_surfaceData_fsaverage5/rh_surf_LausanneParcelIDs.mat', 'rh_surf_LausanneParcelIDs');
 
 data = nan(234, 1);
 for i = 1:234
