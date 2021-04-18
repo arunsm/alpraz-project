@@ -23,7 +23,7 @@ for i = 1:nContrasts
     %persistence_allNodes = allControlEnergies_emotionid_currentContrast.persistence_allNodes;
     %h = kstest(zscore(persistence_allNodes));
     %figure, histogram(persistence_allNodes); title(strcat('KS test: ', num2str(h)));
-    mixedModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'persistence_allNodes ~ drug + SISTOTAL + drug*SISTOTAL + gender + age + (1|subjectID)', 'FitMethod', 'ML');
+    mixedModel_emotionid_currentContrast = fitlme(allControlEnergies_emotionid_currentContrast, 'persistence_allNodes ~ drug + SISTOTAL + drug*SISTOTAL + avge_FD + gender + age + (1|subjectID)', 'FitMethod', 'ML');
     save(strcat(resultsDirCurrentFigure, 'mixedModel_emotionid_SISTOTAL_', currentContrast, '.mat'), 'mixedModel_emotionid_currentContrast');
     printFileName = strcat(resultsDirCurrentFigure, 'mixedModel_emotionid_SISTOTAL_', currentContrast, '.xlsx');
     printLinearMixedModel(mixedModel_emotionid_currentContrast, printFileName);
@@ -44,7 +44,7 @@ for i = 1:nContrasts
     %persistence_allNodes = allControlEnergies_emotionrec_currentContrast.persistence_allNodes;
     %h = kstest(zscore(persistence_allNodes));
     %figure, histogram(persistence_allNodes); title(strcat('KS test: ', num2str(h)));
-    mixedModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'persistence_allNodes ~ drug + SISTOTAL + drug*SISTOTAL + gender + age + (1|subjectID)', 'FitMethod', 'ML');
+    mixedModel_emotionrec_currentContrast = fitlme(allControlEnergies_emotionrec_currentContrast, 'persistence_allNodes ~ drug + SISTOTAL + drug*SISTOTAL + avge_FD + gender + age + (1|subjectID)', 'FitMethod', 'ML');
     save(strcat(resultsDirCurrentFigure, 'mixedModel_emotionrec_SISTOTAL_', currentContrast, '.mat'), 'mixedModel_emotionrec_currentContrast');
     printFileName = strcat(resultsDirCurrentFigure, 'mixedModel_emotionrec_SISTOTAL_', currentContrast, '.xlsx');
     printLinearMixedModel(mixedModel_emotionrec_currentContrast, printFileName);

@@ -19,16 +19,6 @@ printTable1()
 %% figure 1 - structural matrix heatmap, brain maps for sample subject, Lausanne parcellation for schematic
 printFigure1(A, allControlTrajectories_emotionid)
 
-%% figure 2 - box plots of persistence energy, control impact brain maps, sorted Lausanne parcels of control impact
-printFigure2(allControlEnergies_emotionid, allControlEnergies_emotionrec, ...
-    allControlTrajectories_emotionid, allControlTrajectories_emotionrec)
-
-%% figure 3 - persistence energy vs task efficiency
-printFigure3(allControlEnergies_emotionid, allControlEnergies_emotionrec)
-
-%% figure 4 - spatial maps of drug differences in control input, PET maps, correlations between PET maps and drug differences
-printFigure4(allControlTrajectories_emotionid, allControlTrajectories_emotionrec)
-
 %% Supplementary Data Files 1 -  mixed models with categorical variables
 printSupplementaryDataFiles1(allControlEnergies_emotionid, allControlEnergies_emotionrec)
 
@@ -38,8 +28,24 @@ printSupplementaryDataFiles2(allControlEnergies_emotionid, allControlEnergies_em
 %% Supplementary Data Files 3 - mixed models with SISTOTAL
 printSupplementaryDataFiles3(allControlEnergies_emotionid, allControlEnergies_emotionrec)
 
-%% Supplementary Data Files 5 - mixed models for efficiency vs PE
-printSupplementaryDataFiles5(allControlEnergies_emotionid, allControlEnergies_emotionrec)
+%% Supplementary Data Files 6 - mixed models for efficiency vs PE
+printSupplementaryDataFiles6(allControlEnergies_emotionid, allControlEnergies_emotionrec)
+
+%% Supplementary Data Files 8 - structural null models
+printSupplementaryDataFiles8(allControlEnergies_emotionid, allControlEnergies_emotionrec)
+
+%% Supplementary Data Files 9 - spatial activity null models
+printSupplementaryDataFiles9(allControlEnergies_emotionid, allControlEnergies_emotionrec)
+
+%% figure 2 - box plots of persistence energy, control impact brain maps, sorted Lausanne parcels of control impact
+printFigure2(allControlEnergies_emotionid, allControlEnergies_emotionrec, ...
+    allControlTrajectories_emotionid, allControlTrajectories_emotionrec)
+
+%% figure 3 - persistence energy vs task efficiency
+printFigure3(allControlEnergies_emotionid, allControlEnergies_emotionrec)
+
+%% figure 4 - spatial maps of drug differences in control input, PET maps, correlations between PET maps and drug differences
+printFigure4(allControlTrajectories_emotionid, allControlTrajectories_emotionrec)
 
 %% figure S1 - brain map of slab coverage
 printFigureS1()
@@ -52,6 +58,3 @@ printFigureS3(allControlTrajectories_emotionid, allControlTrajectories_emotionre
 
 %% figure S4 - brain maps of control inputs, sorted Lausanne parcels of control inputs
 printFigureS4(allControlTrajectories_emotionid, allControlTrajectories_emotionrec)
-
-%% figure S5 - 
-printFigureS5()

@@ -22,4 +22,6 @@ nNodes = 233;
 nTimeSteps = 1001;
 
 pathToDemographics = '../../data/Alpraz_subjectDemographics.xlsx';
+pathToMotionFile = '../../data/subjectMotion.csv';
 subjectDemographics = readtable(pathToDemographics);
+subjectMotion = readtable(pathToMotionFile);

@@ -15,14 +15,14 @@ for c = 1:nContrasts
     currentContrast = contrastLabels{c};
     
     % import p-values from mixed models
-    mixedModel = strcat(resultsDir, 'SupplementaryDataFiles5', filesep, 'efficiencyModel_emotionid_', currentContrast, '.mat');
+    mixedModel = strcat(resultsDir, 'SupplementaryDataFiles6', filesep, 'efficiencyModel_emotionid_', currentContrast, '.mat');
     load(mixedModel, 'efficiencyModel_emotionid_currentContrast');
     coefficient_estimates = efficiencyModel_emotionid_currentContrast.Coefficients.Estimate;
     coefficient_names = efficiencyModel_emotionid_currentContrast.Coefficients.Name;
     coefficient_pValues = efficiencyModel_emotionid_currentContrast.Coefficients.pValue;
     
-    pValues_persistence(ctr) = coefficient_pValues(strcmp(coefficient_names, 'persistence_allNodes'));
-    coefficients_persistence(ctr) = coefficient_estimates(strcmp(coefficient_names, 'persistence_allNodes'));
+    pValues_persistence(ctr) = coefficient_pValues(strcmp(coefficient_names, 'persistence_between_person'));
+    coefficients_persistence(ctr) = coefficient_estimates(strcmp(coefficient_names, 'persistence_between_person'));
     ctr = ctr + 1;  
 end
 
@@ -30,14 +30,14 @@ for c = 1:nContrasts
     currentContrast = contrastLabels{c};
     
     % import p-values from mixed models
-    mixedModel = strcat(resultsDir, 'SupplementaryDataFiles5', filesep, 'efficiencyModel_emotionrec_', currentContrast, '.mat');
+    mixedModel = strcat(resultsDir, 'SupplementaryDataFiles6', filesep, 'efficiencyModel_emotionrec_', currentContrast, '.mat');
     load(mixedModel, 'efficiencyModel_emotionrec_currentContrast');
     coefficient_estimates = efficiencyModel_emotionrec_currentContrast.Coefficients.Estimate;
     coefficient_names = efficiencyModel_emotionrec_currentContrast.Coefficients.Name;
     coefficient_pValues = efficiencyModel_emotionrec_currentContrast.Coefficients.pValue;
     
-    pValues_persistence(ctr) = coefficient_pValues(strcmp(coefficient_names, 'persistence_allNodes'));
-    coefficients_persistence(ctr) = coefficient_estimates(strcmp(coefficient_names, 'persistence_allNodes'));
+    pValues_persistence(ctr) = coefficient_pValues(strcmp(coefficient_names, 'persistence_between_person'));
+    coefficients_persistence(ctr) = coefficient_estimates(strcmp(coefficient_names, 'persistence_between_person'));
     ctr = ctr + 1;  
 end
 
